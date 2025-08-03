@@ -164,16 +164,24 @@
 
     <!-- Firebase SDK Imports -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-        // Variáveis globais fornecidas pelo ambiente
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        // Substitua ESTE OBJETO INTEIRO pelo objeto `firebaseConfig` que você copiou do console do Firebase.
+        const firebaseConfig = {
+          apiKey: "AIzaSyAd1b6_av2NKg5WDdM03W8m6KuGkxhQpyQ",
+          authDomain: "controle-financeiro-926ca.firebaseapp.com",
+          projectId: "controle-financeiro-926ca",
+          storageBucket: "controle-financeiro-926ca.firebasestorage.app",
+          messagingSenderId: "36138830702",
+          appId: "1:36138830702:web:1455e530174bb08c038f7f"
+        };
+        
+        // O app ID do seu projeto no Firestore
+        const appId = firebaseConfig.projectId;
 
-        // Inicializa o Firebase
+        // Inicializa o Firebase com as suas credenciais
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
@@ -397,18 +405,11 @@
             
             // Autentica com o Firebase
             onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    userId = user.uid;
-                } else {
+                if (!user) {
                     try {
-                        if (initialAuthToken) {
-                            await signInWithCustomToken(auth, initialAuthToken);
-                        } else {
-                            await signInAnonymously(auth);
-                        }
+                        // Faz login de forma anônima no ambiente GitHub Pages
+                        await signInAnonymously(auth);
                         userId = auth.currentUser.uid;
-                        userIdDisplay.textContent = `User ID: ${userId}`;
-                        
                     } catch (error) {
                         console.error("Erro de autenticação:", error);
                     }
@@ -416,6 +417,8 @@
                 
                 // Conecta aos listeners de tempo real do Firestore após a autenticação
                 if (userId) {
+                    userIdDisplay.textContent = `User ID: ${userId}`;
+                    
                     // Listener para Entradas
                     const entradasCollection = collection(db, `/artifacts/${appId}/users/${userId}/entrada`);
                     onSnapshot(entradasCollection, (snapshot) => {
