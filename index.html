@@ -22,6 +22,31 @@
         <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">Controle Financeiro</h1>
         <p id="userIdDisplay" class="text-center text-sm text-gray-500 mb-4"></p>
         
+        <!-- Seção de Filtro por Mês e Ano -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+            <div class="flex items-center gap-2">
+                <label for="mes" class="text-gray-700 font-medium">Mês:</label>
+                <select id="mes" class="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="1">Janeiro</option>
+                    <option value="2">Fevereiro</option>
+                    <option value="3">Março</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Maio</option>
+                    <option value="6">Junho</option>
+                    <option value="7">Julho</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Setembro</option>
+                    <option value="10">Outubro</option>
+                    <option value="11">Novembro</option>
+                    <option value="12">Dezembro</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label for="ano" class="text-gray-700 font-medium">Ano:</label>
+                <input type="number" id="ano" min="2000" max="2100" class="p-2 border border-gray-300 rounded-lg w-24 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+        </div>
+
         <!-- Seção de Resumo -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <!-- Card de Entradas -->
@@ -131,6 +156,7 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Local</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
                             </tr>
                         </thead>
                         <tbody id="entradasList" class="bg-white divide-y divide-gray-200">
@@ -151,6 +177,7 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Local</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parcela</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
                             </tr>
                         </thead>
                         <tbody id="saidasList" class="bg-white divide-y divide-gray-200">
@@ -166,9 +193,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-        // Substitua ESTE OBJETO INTEIRO pelo objeto `firebaseConfig` que você copiou do console do Firebase.
         const firebaseConfig = {
           apiKey: "AIzaSyAd1b6_av2NKg5WDdM03W8m6KuGkxhQpyQ",
           authDomain: "controle-financeiro-926ca.firebaseapp.com",
@@ -200,6 +226,8 @@
         const saidasListEl = document.getElementById('saidasList');
         const orcamentoListEl = document.getElementById('orcamentoList');
         const userIdDisplay = document.getElementById('userIdDisplay');
+        const mesSelect = document.getElementById('mes');
+        const anoInput = document.getElementById('ano');
 
         const btnEntrada = document.getElementById('btnEntrada');
         const btnSaida = document.getElementById('btnSaida');
@@ -224,7 +252,7 @@
             "Saúde": 200,
             "Casa": 500,
             "Alimentação": 1000,
-            "Presente": 200 // Adicionada a categoria "Presente"
+            "Presente": 200
         };
 
         const categorias = Object.keys(orcamentos);
@@ -247,10 +275,18 @@
             });
         }
 
+        // Função para filtrar transações por mês e ano
+        function filtrarTransacoes(transacoes, mes, ano) {
+            return transacoes.filter(transacao => {
+                const data = new Date(transacao.data);
+                return data.getMonth() + 1 === mes && data.getFullYear() === ano;
+            });
+        }
+
         // Atualiza os valores do dashboard
-        function atualizarResumo() {
-            const totalEntradas = entradas.reduce((acc, transacao) => acc + transacao.valor, 0);
-            const totalSaidas = saidas.reduce((acc, transacao) => acc + transacao.valor, 0);
+        function atualizarResumo(entradasFiltradas, saidasFiltradas) {
+            const totalEntradas = entradasFiltradas.reduce((acc, transacao) => acc + transacao.valor, 0);
+            const totalSaidas = saidasFiltradas.reduce((acc, transacao) => acc + transacao.valor, 0);
             const saldoMes = totalEntradas - totalSaidas;
 
             totalEntradasEl.textContent = formatarMoeda(totalEntradas);
@@ -268,12 +304,12 @@
         }
 
         // Renderiza as listas de transações
-        function renderizarListas() {
+        function renderizarListas(entradasFiltradas, saidasFiltradas) {
             // Limpa as tabelas antes de renderizar
             entradasListEl.innerHTML = '';
             saidasListEl.innerHTML = '';
 
-            entradas.forEach(transacao => {
+            entradasFiltradas.forEach(transacao => {
                 const row = document.createElement('tr');
                 row.classList.add('hover:bg-gray-50');
                 row.innerHTML = `
@@ -282,11 +318,16 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${transacao.categoria}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">${formatarMoeda(transacao.valor)}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${transacao.local}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button onclick="removerTransacao('${transacao.id}', 'entrada')" class="text-red-600 hover:text-red-900 ml-4">
+                            Remover
+                        </button>
+                    </td>
                 `;
                 entradasListEl.appendChild(row);
             });
 
-            saidas.forEach(transacao => {
+            saidasFiltradas.forEach(transacao => {
                 const row = document.createElement('tr');
                 row.classList.add('hover:bg-gray-50');
                 row.innerHTML = `
@@ -296,16 +337,21 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600">${formatarMoeda(transacao.valor)}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${transacao.local}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${transacao.parcela}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button onclick="removerTransacao('${transacao.id}', 'saida')" class="text-red-600 hover:text-red-900 ml-4">
+                            Remover
+                        </button>
+                    </td>
                 `;
                 saidasListEl.appendChild(row);
             });
         }
 
         // Renderiza a seção de orçamento (Farol)
-        function renderizarOrcamento() {
+        function renderizarOrcamento(saidasFiltradas) {
             orcamentoListEl.innerHTML = '';
 
-            const gastosPorCategoria = saidas.reduce((acc, transacao) => {
+            const gastosPorCategoria = saidasFiltradas.reduce((acc, transacao) => {
                 if (acc[transacao.categoria]) {
                     acc[transacao.categoria] += transacao.valor;
                 } else {
@@ -342,6 +388,23 @@
                 orcamentoListEl.appendChild(card);
             }
         }
+
+        // Função para remover uma transação
+        async function removerTransacao(transacaoId, tipo) {
+            if (!confirm(`Tem certeza que deseja remover esta transação?`)) {
+                return;
+            }
+
+            try {
+                const docRef = doc(db, `/artifacts/${appId}/users/${userId}/${tipo}`, transacaoId);
+                await deleteDoc(docRef);
+                console.log("Transação removida com sucesso!");
+            } catch (e) {
+                console.error("Erro ao remover documento: ", e);
+            }
+        }
+        
+        window.removerTransacao = removerTransacao; // Torna a função global para ser acessada pelo onclick
 
         // Adiciona um listener para o formulário de transações
         transacaoForm.addEventListener('submit', async function(event) {
@@ -415,6 +478,10 @@
             parcelaField.style.display = 'block';
         });
 
+        // Adiciona listeners para o seletor de mês e ano
+        mesSelect.addEventListener('change', atualizarUI);
+        anoInput.addEventListener('change', atualizarUI);
+
         // Função utilitária para formatar valores em moeda
         function formatarMoeda(valor) {
             return new Intl.NumberFormat('pt-BR', {
@@ -423,10 +490,28 @@
             }).format(valor);
         }
 
+        // Função principal para atualizar toda a interface
+        function atualizarUI() {
+            const mes = parseInt(mesSelect.value);
+            const ano = parseInt(anoInput.value);
+
+            const entradasFiltradas = filtrarTransacoes(entradas, mes, ano);
+            const saidasFiltradas = filtrarTransacoes(saidas, mes, ano);
+            
+            atualizarResumo(entradasFiltradas, saidasFiltradas);
+            renderizarListas(entradasFiltradas, saidasFiltradas);
+            renderizarOrcamento(saidasFiltradas);
+        }
+
         // Inicializa o aplicativo
         window.onload = function() {
             preencherCategorias();
             
+            // Define o mês e ano atuais como padrão
+            const hoje = new Date();
+            mesSelect.value = hoje.getMonth() + 1;
+            anoInput.value = hoje.getFullYear();
+
             // Autentica com o Firebase
             onAuthStateChanged(auth, async (user) => {
                 if (!user) {
@@ -449,18 +534,14 @@
                     const entradasCollection = collection(db, `/artifacts/${appId}/users/${userId}/entrada`);
                     onSnapshot(entradasCollection, (snapshot) => {
                         entradas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                        atualizarResumo();
-                        renderizarListas();
-                        renderizarOrcamento();
+                        atualizarUI();
                     });
 
                     // Listener para Saídas
                     const saidasCollection = collection(db, `/artifacts/${appId}/users/${userId}/saida`);
                     onSnapshot(saidasCollection, (snapshot) => {
                         saidas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                        atualizarResumo();
-                        renderizarListas();
-                        renderizarOrcamento();
+                        atualizarUI();
                     });
                 }
             });
