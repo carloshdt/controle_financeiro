@@ -34,10 +34,10 @@
                     <span>Login com Google</span>
                 </button>
                 <p id="authMessage" class="text-center text-sm text-gray-500 hidden"></p>
+                <button id="logoutBtn" class="py-1 px-2 text-sm text-red-600 hover:text-red-800 transition duration-200 hidden absolute top-0 right-0">
+                    Sair
+                </button>
             </div>
-            <button id="logoutBtn" class="py-1 px-2 text-sm text-red-600 hover:text-red-800 transition duration-200 hidden absolute top-0 right-0">
-                Sair
-            </button>
         </div>
         
         <!-- Seção de Filtro por Mês e Ano -->
@@ -272,7 +272,8 @@
             "Pitoco": 1000,
             "Saúde": 200,
             "Casa": 500,
-            "Alimentação": 1000
+            "Alimentação": 1000,
+            "Presente": 200
         };
 
         const categorias = Object.keys(orcamentos);
@@ -534,8 +535,12 @@
             const mes = parseInt(mesSelect.value);
             const ano = parseInt(anoInput.value);
 
-            const entradasFiltradas = filtrarTransacoes(entradas, mes, ano);
-            const saidasFiltradas = filtrarTransacoes(saidas, mes, ano);
+            // Ordena as transações por data de forma decrescente
+            const entradasOrdenadas = entradas.sort((a, b) => new Date(b.data) - new Date(a.data));
+            const saidasOrdenadas = saidas.sort((a, b) => new Date(b.data) - new Date(a.data));
+            
+            const entradasFiltradas = filtrarTransacoes(entradasOrdenadas, mes, ano);
+            const saidasFiltradas = filtrarTransacoes(saidasOrdenadas, mes, ano);
             
             atualizarResumo(entradasFiltradas, saidasFiltradas);
             renderizarListas(entradasFiltradas, saidasFiltradas);
