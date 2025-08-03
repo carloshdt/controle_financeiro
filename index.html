@@ -15,6 +15,8 @@
         .bg-green-farol { background-color: #4CAF50; }
         .bg-yellow-farol { background-color: #FFC107; }
         .bg-red-farol { background-color: #F44336; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
     </style>
 </head>
 <body class="bg-gray-100 p-4 sm:p-8">
@@ -34,10 +36,10 @@
                     <span>Login com Google</span>
                 </button>
                 <p id="authMessage" class="text-center text-sm text-gray-500 hidden"></p>
-                <button id="logoutBtn" class="py-1 px-2 text-sm text-red-600 hover:text-red-800 transition duration-200 hidden absolute top-0 right-0">
-                    Sair
-                </button>
             </div>
+            <button id="logoutBtn" class="py-1 px-2 text-sm text-red-600 hover:text-red-800 transition duration-200 hidden absolute top-0 right-0">
+                Sair
+            </button>
         </div>
         
         <!-- Seção de Filtro por Mês e Ano -->
@@ -65,10 +67,10 @@
             </div>
         </div>
 
-        <!-- Seção de Resumo -->
+        <!-- Seção de Resumo (agora fixa) -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <!-- Card de Entradas -->
-            <div class="bg-white rounded-xl shadow-lg p-6 transform transition-all duration-300 hover:scale-[1.01]">
+            <div class="bg-white rounded-xl shadow-lg p-6">
                 <div class="flex justify-between items-center mb-2">
                     <p class="text-gray-500 font-medium">Entradas</p>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -78,7 +80,7 @@
                 <p id="totalEntradas" class="text-3xl font-bold text-gray-800">R$ 0,00</p>
             </div>
             <!-- Card de Saídas -->
-            <div class="bg-white rounded-xl shadow-lg p-6 transform transition-all duration-300 hover:scale-[1.01]">
+            <div class="bg-white rounded-xl shadow-lg p-6">
                 <div class="flex justify-between items-center mb-2">
                     <p class="text-gray-500 font-medium">Saídas</p>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -88,7 +90,7 @@
                 <p id="totalSaidas" class="text-3xl font-bold text-gray-800">R$ 0,00</p>
             </div>
             <!-- Card de Saldo -->
-            <div class="bg-white rounded-xl shadow-lg p-6 transform transition-all duration-300 hover:scale-[1.01]">
+            <div class="bg-white rounded-xl shadow-lg p-6">
                 <div class="flex justify-between items-center mb-2">
                     <p class="text-gray-500 font-medium">Saldo do Mês</p>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -155,53 +157,66 @@
 
             <!-- Painel de Listas de Transações e Orçamento -->
             <div class="lg:col-span-2 flex flex-col gap-8">
-                <!-- Seção de Orçamento (Farol) -->
-                <div class="bg-white rounded-xl shadow-lg p-6">
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Orçamento (Farol)</h2>
-                    <div id="orcamentoList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <!-- Itens do orçamento serão preenchidos via JS -->
+                <!-- Abas de navegação -->
+                <div class="flex border-b border-gray-200">
+                    <button id="tabSaidas" class="flex-1 py-2 px-4 text-center text-gray-600 font-medium hover:bg-gray-200 transition duration-200 focus:outline-none border-b-2 border-indigo-500">Saídas</button>
+                    <button id="tabEntradas" class="flex-1 py-2 px-4 text-center text-gray-600 font-medium hover:bg-gray-200 transition duration-200 focus:outline-none">Entradas</button>
+                    <button id="tabOrcamento" class="flex-1 py-2 px-4 text-center text-gray-600 font-medium hover:bg-gray-200 transition duration-200 focus:outline-none">Orçamento</button>
+                </div>
+
+                <!-- Conteúdo das abas -->
+                <div id="tabContentWrapper" class="relative">
+                    <!-- Aba de Saídas -->
+                    <div id="saidasContent" class="tab-content active">
+                        <div class="bg-white rounded-xl shadow-lg p-6 overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Local</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parcela</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="saidasList" class="bg-white divide-y divide-gray-200">
+                                    <!-- Itens da tabela serão preenchidos via JS -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Lista de Entradas -->
-                <div class="bg-white rounded-xl shadow-lg p-6 overflow-x-auto">
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Entradas</h2>
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Local</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="entradasList" class="bg-white divide-y divide-gray-200">
-                            <!-- Itens da tabela serão preenchidos via JS -->
-                        </tbody>
-                    </table>
-                </div>
+                    <!-- Aba de Entradas -->
+                    <div id="entradasContent" class="tab-content">
+                         <div class="bg-white rounded-xl shadow-lg p-6 overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Local</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="entradasList" class="bg-white divide-y divide-gray-200">
+                                    <!-- Itens da tabela serão preenchidos via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 
-                <!-- Lista de Saídas -->
-                <div class="bg-white rounded-xl shadow-lg p-6 overflow-x-auto">
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Saídas</h2>
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Local</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parcela</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="saidasList" class="bg-white divide-y divide-gray-200">
-                            <!-- Itens da tabela serão preenchidos via JS -->
-                        </tbody>
-                    </table>
+                    <!-- Aba de Orçamento -->
+                    <div id="orcamentoContent" class="tab-content">
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <div id="orcamentoList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <!-- Itens do orçamento serão preenchidos via JS -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -238,6 +253,14 @@
         let saidas = [];
 
         // Referências aos elementos do DOM
+        const tabSaidasBtn = document.getElementById('tabSaidas');
+        const tabEntradasBtn = document.getElementById('tabEntradas');
+        const tabOrcamentoBtn = document.getElementById('tabOrcamento');
+
+        const saidasContent = document.getElementById('saidasContent');
+        const entradasContent = document.getElementById('entradasContent');
+        const orcamentoContent = document.getElementById('orcamentoContent');
+
         const totalEntradasEl = document.getElementById('totalEntradas');
         const totalSaidasEl = document.getElementById('totalSaidas');
         const saldoMesEl = document.getElementById('saldoMes');
@@ -499,6 +522,30 @@
             btnEntrada.classList.add('bg-gray-300', 'text-gray-800');
             parcelaField.style.display = 'block';
         });
+
+        // Lógica das abas
+        const tabs = [
+            { btn: tabSaidasBtn, content: saidasContent },
+            { btn: tabEntradasBtn, content: entradasContent },
+            { btn: tabOrcamentoBtn, content: orcamentoContent }
+        ];
+
+        function activateTab(activeTab) {
+            tabs.forEach(tab => {
+                if (tab === activeTab) {
+                    tab.btn.classList.add('border-indigo-500');
+                    tab.content.classList.add('active');
+                } else {
+                    tab.btn.classList.remove('border-indigo-500');
+                    tab.content.classList.remove('active');
+                }
+            });
+        }
+        
+        tabs.forEach(tab => {
+            tab.btn.addEventListener('click', () => activateTab(tab));
+        });
+
 
         // Adiciona listeners para o seletor de mês e ano
         mesSelect.addEventListener('change', atualizarUI);
