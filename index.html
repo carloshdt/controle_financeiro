@@ -22,18 +22,20 @@
         <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">Controle Financeiro</h1>
         
         <!-- Seção de Login e Mensagem do Usuário -->
-        <div id="authSection" class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
-            <button id="googleSignInBtn" class="flex items-center gap-2 py-2 px-4 bg-white text-gray-800 rounded-lg shadow-md hover:bg-gray-100 transition duration-200">
-                <svg class="h-5 w-5" viewBox="0 0 48 48">
-                    <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,19.034-8.119,19.82-18.125C43.812,21.523,43.611,20.738,43.611,20.083z"/>
-                    <path fill="#FF3D00" d="M6.306,14.691l6.198,3.774C14.656,15.688,16.89,14.557,19,14.47c2.997,0,5.632,0.966,7.747,2.586l3.35-3.35C27.359,10.66,23.856,9,20,9c-4.992,0-9.422,1.868-12.75,4.606L6.306,14.691z"/>
-                    <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.419-5.394L31.624,32.4c-1.921,1.52-4.485,2.4-7.624,2.4c-4.992,0-9.422-1.868-12.75-4.606l-6.198,3.774C14.606,39.996,19.349,44,24,44z"/>
-                    <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4c-11.045,0-19.034,8.119-19.82,18.125c-0.121,0.589-0.18,1.258-0.18,1.938c0,11.045,8.955,20,20,20c5.166,0,9.86-1.977,13.419-5.394L31.624,32.4c-1.921,1.52-4.485,2.4-7.624,2.4c-4.992,0-9.422-1.868-12.75-4.606l-6.198,3.774C14.606,39.996,19.349,44,24,44z"/>
-                </svg>
-                <span>Login com Google</span>
-            </button>
-            <p id="authMessage" class="text-center text-sm text-gray-500 hidden"></p>
-            <button id="logoutBtn" class="flex-1 py-2 px-4 rounded-lg font-semibold bg-gray-500 text-white shadow hover:bg-gray-600 transition duration-200 hidden">
+        <div class="flex items-center justify-between flex-wrap gap-4 mb-6 relative">
+            <div id="authSection" class="flex items-center gap-4">
+                <button id="googleSignInBtn" class="flex items-center gap-2 py-2 px-4 bg-white text-gray-800 rounded-lg shadow-md hover:bg-gray-100 transition duration-200">
+                    <svg class="h-5 w-5" viewBox="0 0 48 48">
+                        <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,19.034-8.119,19.82-18.125C43.812,21.523,43.611,20.738,43.611,20.083z"/>
+                        <path fill="#FF3D00" d="M6.306,14.691l6.198,3.774C14.656,15.688,16.89,14.557,19,14.47c2.997,0,5.632,0.966,7.747,2.586l3.35-3.35C27.359,10.66,23.856,9,20,9c-4.992,0-9.422,1.868-12.75,4.606L6.306,14.691z"/>
+                        <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.419-5.394L31.624,32.4c-1.921,1.52-4.485,2.4-7.624,2.4c-4.992,0-9.422-1.868-12.75-4.606l-6.198,3.774C14.606,39.996,19.349,44,24,44z"/>
+                        <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4c-11.045,0-19.034,8.119-19.82,18.125c-0.121,0.589-0.18,1.258-0.18,1.938c0,11.045,8.955,20,20,20c5.166,0,9.86-1.977,13.419-5.394L31.624,32.4c-1.921,1.52-4.485,2.4-7.624,2.4c-4.992,0-9.422-1.868-12.75-4.606l-6.198,3.774C14.606,39.996,19.349,44,24,44z"/>
+                    </svg>
+                    <span>Login com Google</span>
+                </button>
+                <p id="authMessage" class="text-center text-sm text-gray-500 hidden"></p>
+            </div>
+            <button id="logoutBtn" class="py-1 px-2 text-sm text-red-600 hover:text-red-800 transition duration-200 hidden absolute top-0 right-0">
                 Sair
             </button>
         </div>
@@ -415,7 +417,7 @@
             }
 
             try {
-                const docRef = doc(db, `/artifacts/${appId}/public/${tipo}`, transacaoId);
+                const docRef = doc(db, `/artifacts/${appId}/public/data/${tipo}`, transacaoId);
                 await deleteDoc(docRef);
                 console.log("Transação removida com sucesso!");
             } catch (e) {
@@ -466,7 +468,7 @@
 
             try {
                 // Salva a transação no Firestore na coleção pública
-                const collectionPath = `/artifacts/${appId}/public/${tipo}`;
+                const collectionPath = `/artifacts/${appId}/public/data/${tipo}`;
                 await addDoc(collection(db, collectionPath), novaTransacao);
                 console.log(`Transação de ${tipo} adicionada com sucesso.`);
             } catch (e) {
@@ -560,13 +562,13 @@
                     logoutBtn.style.display = 'block';
                     
                     // Conecta aos listeners de tempo real da nova coleção pública
-                    const entradasCollection = collection(db, `/artifacts/${appId}/public/entrada`);
+                    const entradasCollection = collection(db, `/artifacts/${appId}/public/data/entrada`);
                     onSnapshot(entradasCollection, (snapshot) => {
                         entradas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                         atualizarUI();
                     });
 
-                    const saidasCollection = collection(db, `/artifacts/${appId}/public/saida`);
+                    const saidasCollection = collection(db, `/artifacts/${appId}/public/data/saida`);
                     onSnapshot(saidasCollection, (snapshot) => {
                         saidas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                         atualizarUI();
