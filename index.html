@@ -338,6 +338,11 @@
         transacaoForm.addEventListener('submit', async function(event) {
             event.preventDefault();
 
+            // Desativa o botão para evitar cliques múltiplos
+            const submitBtn = event.submitter;
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
             const tipo = tipoTransacaoInput.value;
             const data = document.getElementById('data').value;
             const descricao = document.getElementById('descricao').value;
@@ -345,6 +350,14 @@
             const valor = parseFloat(document.getElementById('valor').value);
             const local = document.getElementById('local').value;
             const parcela = document.getElementById('parcela').value;
+
+            if (!userId) {
+                console.error("Erro ao adicionar documento: User ID não está disponível.");
+                // Reativa o botão
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                return;
+            }
 
             const novaTransacao = {
                 data,
@@ -368,7 +381,9 @@
                 console.error("Erro ao adicionar documento: ", e);
             }
 
-            // Limpa o formulário
+            // Reativa o botão e limpa o formulário
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             transacaoForm.reset();
         });
 
@@ -413,6 +428,8 @@
                     } catch (error) {
                         console.error("Erro de autenticação:", error);
                     }
+                } else {
+                    userId = user.uid;
                 }
                 
                 // Conecta aos listeners de tempo real do Firestore após a autenticação
