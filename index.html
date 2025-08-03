@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle Financeiro</title>
+    <!-- Favicon do aplicativo -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>">
     <!-- Incluindo Tailwind CSS para estilização -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -357,7 +359,7 @@
                 const row = document.createElement('tr');
                 row.classList.add('hover:bg-gray-50');
                 // Formata a data para dd/mm/aa
-                const dataFormatada = transacao.data.split('-').reverse().join('/').slice(0, 8);
+                const dataFormatada = formatarData(transacao.data);
                 row.innerHTML = `
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${dataFormatada}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">${formatarMoeda(transacao.valor)}</td>
@@ -377,7 +379,7 @@
                 const row = document.createElement('tr');
                 row.classList.add('hover:bg-gray-50');
                 // Formata a data para dd/mm/aa
-                const dataFormatada = transacao.data.split('-').reverse().join('/').slice(0, 8);
+                const dataFormatada = formatarData(transacao.data);
                 row.innerHTML = `
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${dataFormatada}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600">${formatarMoeda(transacao.valor)}</td>
