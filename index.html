@@ -223,13 +223,22 @@
             "Pitoco": 1000,
             "Saúde": 200,
             "Casa": 500,
-            "Alimentação": 1000
+            "Alimentação": 1000,
+            "Presente": 200 // Adicionada a categoria "Presente"
         };
 
         const categorias = Object.keys(orcamentos);
 
         // Preenche o select de categorias
         function preencherCategorias() {
+            categoriaSelect.innerHTML = ''; // Limpa as opções existentes
+            const placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = 'Selecione uma categoria';
+            placeholder.disabled = true;
+            placeholder.selected = true;
+            categoriaSelect.appendChild(placeholder);
+
             categorias.forEach(categoria => {
                 const option = document.createElement('option');
                 option.value = categoria;
