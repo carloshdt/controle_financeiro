@@ -173,9 +173,9 @@
                                 <thead class="bg-gray-50">
                                     <tr>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Local</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parcela</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
@@ -195,9 +195,9 @@
                                 <thead class="bg-gray-50">
                                     <tr>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Local</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
                                     </tr>
@@ -356,11 +356,13 @@
             entradasFiltradas.forEach(transacao => {
                 const row = document.createElement('tr');
                 row.classList.add('hover:bg-gray-50');
+                // Formata a data para dd/mm/aa
+                const dataFormatada = transacao.data.split('-').reverse().join('/').slice(0, 8);
                 row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${transacao.data}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${dataFormatada}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">${formatarMoeda(transacao.valor)}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${transacao.descricao}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${transacao.categoria}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">${formatarMoeda(transacao.valor)}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${transacao.local}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button onclick="removerTransacao('${transacao.id}', 'entrada')" class="text-red-600 hover:text-red-900 ml-4">
@@ -374,11 +376,13 @@
             saidasFiltradas.forEach(transacao => {
                 const row = document.createElement('tr');
                 row.classList.add('hover:bg-gray-50');
+                // Formata a data para dd/mm/aa
+                const dataFormatada = transacao.data.split('-').reverse().join('/').slice(0, 8);
                 row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${transacao.data}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${dataFormatada}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600">${formatarMoeda(transacao.valor)}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${transacao.descricao}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${transacao.categoria}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600">${formatarMoeda(transacao.valor)}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${transacao.local}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${transacao.parcela}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -532,14 +536,11 @@
 
         function activateTab(activeTab) {
             tabs.forEach(tab => {
-                if (tab === activeTab) {
-                    tab.btn.classList.add('border-indigo-500');
-                    tab.content.classList.add('active');
-                } else {
-                    tab.btn.classList.remove('border-indigo-500');
-                    tab.content.classList.remove('active');
-                }
+                tab.btn.classList.remove('border-b-2', 'border-indigo-500');
+                tab.content.classList.remove('active');
             });
+            activeTab.btn.classList.add('border-b-2', 'border-indigo-500');
+            activeTab.content.classList.add('active');
         }
         
         tabs.forEach(tab => {
@@ -575,6 +576,15 @@
                 style: 'currency',
                 currency: 'BRL'
             }).format(valor);
+        }
+        
+        // Função para formatar data
+        function formatarData(dataString) {
+            const date = new Date(dataString);
+            const dia = String(date.getDate()).padStart(2, '0');
+            const mes = String(date.getMonth() + 1).padStart(2, '0');
+            const ano = String(date.getFullYear()).slice(-2);
+            return `${dia}/${mes}/${ano}`;
         }
 
         // Função principal para atualizar toda a interface
