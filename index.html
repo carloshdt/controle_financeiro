@@ -324,7 +324,10 @@
         // Função para filtrar transações por mês e ano
         function filtrarTransacoes(transacoes, mes, ano) {
             return transacoes.filter(transacao => {
-                const data = new Date(transacao.data);
+                // Constrói a data explicitamente para evitar problemas de fuso horário
+                const [year, month, day] = transacao.data.split('-').map(Number);
+                const data = new Date(year, month - 1, day); // Mês é 0-indexado no construtor Date
+
                 return data.getMonth() + 1 === mes && data.getFullYear() === ano;
             });
         }
@@ -582,7 +585,10 @@
         
         // Função para formatar data
         function formatarData(dataString) {
-            const date = new Date(dataString);
+            // Constrói a data explicitamente para evitar problemas de fuso horário
+            const [year, month, day] = dataString.split('-').map(Number);
+            const date = new Date(year, month - 1, day); // Mês é 0-indexado no construtor Date
+
             const dia = String(date.getDate()).padStart(2, '0');
             const mes = String(date.getMonth() + 1).padStart(2, '0');
             const ano = String(date.getFullYear()).slice(-2);
