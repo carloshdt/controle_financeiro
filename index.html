@@ -170,6 +170,12 @@
                 <div id="tabContentWrapper" class="relative">
                     <!-- Aba de Saídas -->
                     <div id="saidasContent" class="tab-content active">
+                         <div class="mb-4 flex items-center gap-2">
+                            <label for="filterSaida" class="text-gray-700 font-medium">Filtrar por Categoria:</label>
+                            <select id="filterSaida" class="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="all">Todas as categorias</option>
+                            </select>
+                        </div>
                         <div class="bg-white rounded-xl shadow-lg p-6 overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
@@ -192,6 +198,12 @@
 
                     <!-- Aba de Entradas -->
                     <div id="entradasContent" class="tab-content">
+                        <div class="mb-4 flex items-center gap-2">
+                            <label for="filterEntrada" class="text-gray-700 font-medium">Filtrar por Categoria:</label>
+                            <select id="filterEntrada" class="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="all">Todas as categorias</option>
+                            </select>
+                        </div>
                          <div class="bg-white rounded-xl shadow-lg p-6 overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
@@ -274,6 +286,10 @@
         const anoInput = document.getElementById('ano');
         const googleSignInBtn = document.getElementById('googleSignInBtn');
         const logoutBtn = document.getElementById('logoutBtn');
+        
+        const filterEntradaSelect = document.getElementById('filterEntrada');
+        const filterSaidaSelect = document.getElementById('filterSaida');
+
 
         const btnEntrada = document.getElementById('btnEntrada');
         const btnSaida = document.getElementById('btnSaida');
@@ -303,9 +319,9 @@
 
         const categorias = Object.keys(orcamentos);
 
-        // Preenche o select de categorias
+        // Preenche os selects de categoria
         function preencherCategorias() {
-            categoriaSelect.innerHTML = ''; // Limpa as opções existentes
+            categoriaSelect.innerHTML = '';
             const placeholder = document.createElement('option');
             placeholder.value = '';
             placeholder.textContent = 'Selecione uma categoria';
@@ -319,6 +335,21 @@
                 option.textContent = categoria;
                 categoriaSelect.appendChild(option);
             });
+            
+            // Preenche os filtros das abas
+            const filtroPlaceholder = document.createElement('option');
+            filtroPlaceholder.value = 'all';
+            filtroPlaceholder.textContent = 'Todas as categorias';
+            filterEntradaSelect.appendChild(filtroPlaceholder.cloneNode(true));
+            filterSaidaSelect.appendChild(filtroPlaceholder.cloneNode(true));
+            
+            categorias.forEach(categoria => {
+                const option = document.createElement('option');
+                option.value = categoria;
+                option.textContent = categoria;
+                filterEntradaSelect.appendChild(option.cloneNode(true));
+                filterSaidaSelect.appendChild(option.cloneNode(true));
+            });
         }
 
         // Função para filtrar transações por mês e ano
@@ -331,6 +362,15 @@
                 return data.getMonth() + 1 === mes && data.getFullYear() === ano;
             });
         }
+        
+        // Função para filtrar transações por categoria
+        function filtrarPorCategoria(transacoes, categoria) {
+            if (categoria === 'all') {
+                return transacoes;
+            }
+            return transacoes.filter(transacao => transacao.categoria === categoria);
+        }
+
 
         // Atualiza os valores do dashboard
         function atualizarResumo(entradasFiltradas, saidasFiltradas) {
@@ -485,27 +525,59 @@
                 return;
             }
 
-            const novaTransacao = {
-                data,
-                descricao,
-                categoria,
-                valor,
-                local,
-                timestamp: serverTimestamp() // Adiciona um timestamp para ordenação
-            };
-            
-            if (tipo === 'saida') {
-                novaTransacao.parcela = parcela;
-            }
+            // Lógica para parcelamento automático
+            const parcelaRegex = /^(\d+)\/(\d+)$/;
+            const match = parcela.match(parcelaRegex);
 
-            try {
-                // Salva a transação no Firestore na coleção pública
+            if (tipo === 'saida' && match) {
+                const parcelaAtual = parseInt(match[1]);
+                const totalParcelas = parseInt(match[2]);
+
+                // Adiciona a parcela atual
+                const transacaoAtual = {
+                    data,
+                    descricao,
+                    categoria,
+                    valor,
+                    local,
+                    parcela,
+                    timestamp: serverTimestamp()
+                };
+                await addDoc(collection(db, `/artifacts/${appId}/public/data/saida`), transacaoAtual);
+
+                // Gera e adiciona as parcelas futuras
+                for (let i = parcelaAtual + 1; i <= totalParcelas; i++) {
+                    const dataOriginal = new Date(data + 'T00:00:00');
+                    const dataProximaParcela = new Date(dataOriginal);
+                    dataProximaParcela.setMonth(dataOriginal.getMonth() + (i - parcelaAtual));
+                    
+                    const proximaParcela = {
+                        data: dataProximaParcela.toISOString().split('T')[0],
+                        descricao,
+                        categoria,
+                        valor,
+                        local,
+                        parcela: `${i}/${totalParcelas}`,
+                        timestamp: serverTimestamp()
+                    };
+                    await addDoc(collection(db, `/artifacts/${appId}/public/data/saida`), proximaParcela);
+                }
+            } else {
+                // Adiciona uma única transação (não parcelada)
+                const novaTransacao = {
+                    data,
+                    descricao,
+                    categoria,
+                    valor,
+                    local,
+                    parcela,
+                    timestamp: serverTimestamp()
+                };
                 const collectionPath = `/artifacts/${appId}/public/data/${tipo}`;
                 await addDoc(collection(db, collectionPath), novaTransacao);
-                console.log(`Transação de ${tipo} adicionada com sucesso.`);
-            } catch (e) {
-                console.error("Erro ao adicionar documento: ", e);
             }
+
+            console.log(`Transação(s) adicionada(s) com sucesso.`);
 
             // Reativa o botão e limpa o formulário
             submitBtn.disabled = false;
@@ -556,6 +628,8 @@
         // Adiciona listeners para o seletor de mês e ano
         mesSelect.addEventListener('change', atualizarUI);
         anoInput.addEventListener('change', atualizarUI);
+        filterEntradaSelect.addEventListener('change', atualizarUI);
+        filterSaidaSelect.addEventListener('change', atualizarUI);
         
         googleSignInBtn.addEventListener('click', async () => {
             try {
@@ -599,13 +673,19 @@
         function atualizarUI() {
             const mes = parseInt(mesSelect.value);
             const ano = parseInt(anoInput.value);
+            const categoriaEntrada = filterEntradaSelect.value;
+            const categoriaSaida = filterSaidaSelect.value;
+
 
             // Ordena as transações por data de forma decrescente
             const entradasOrdenadas = entradas.sort((a, b) => new Date(b.data) - new Date(a.data));
             const saidasOrdenadas = saidas.sort((a, b) => new Date(b.data) - new Date(a.data));
             
-            const entradasFiltradas = filtrarTransacoes(entradasOrdenadas, mes, ano);
-            const saidasFiltradas = filtrarTransacoes(saidasOrdenadas, mes, ano);
+            const entradasFiltradasMesAno = filtrarTransacoes(entradasOrdenadas, mes, ano);
+            const saidasFiltradasMesAno = filtrarTransacoes(saidasOrdenadas, mes, ano);
+
+            const entradasFiltradas = filtrarPorCategoria(entradasFiltradasMesAno, categoriaEntrada);
+            const saidasFiltradas = filtrarPorCategoria(saidasFiltradasMesAno, categoriaSaida);
             
             atualizarResumo(entradasFiltradas, saidasFiltradas);
             renderizarListas(entradasFiltradas, saidasFiltradas);
