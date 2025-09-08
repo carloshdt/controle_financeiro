@@ -150,6 +150,12 @@
                         <label for="parcela" class="block text-gray-700 font-medium mb-1">Parcela (Ex: 1/10)</label>
                         <input type="text" id="parcela" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
+                    <div id="recorrenteField" class="mb-4" style="display: none;">
+                        <label for="recorrente" class="flex items-center text-gray-700 font-medium">
+                            <input type="checkbox" id="recorrente" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                            Recorrente?
+                        </label>
+                    </div>
                     
                     <button type="submit" class="w-full bg-indigo-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-indigo-700 transition duration-200">
                         Adicionar Transação
@@ -265,6 +271,7 @@
         // Variáveis para as listas de dados
         let entradas = [];
         let saidas = [];
+        let recorrentes = []; // Nova variável para despesas recorrentes
 
         // Referências aos elementos do DOM
         const tabSaidasBtn = document.getElementById('tabSaidas');
@@ -295,6 +302,8 @@
         const btnSaida = document.getElementById('btnSaida');
         const tipoTransacaoInput = document.getElementById('tipoTransacao');
         const parcelaField = document.getElementById('parcelaField');
+        const recorrenteField = document.getElementById('recorrenteField');
+        const recorrenteCheckbox = document.getElementById('recorrente');
         const categoriaSelect = document.getElementById('categoria');
         const transacaoForm = document.getElementById('transacaoForm');
         
@@ -515,6 +524,7 @@
             const valor = parseFloat(document.getElementById('valor').value);
             const local = document.getElementById('local').value;
             const parcela = document.getElementById('parcela').value;
+            const recorrente = recorrenteCheckbox.checked;
 
             if (!auth.currentUser) {
                 console.error("Erro ao adicionar documento: Usuário não está logado.");
@@ -541,6 +551,7 @@
                     valor,
                     local,
                     parcela,
+                    recorrente: false, // Parcelas não são marcadas como recorrentes
                     timestamp: serverTimestamp()
                 };
                 await addDoc(collection(db, `/artifacts/${appId}/public/data/saida`), transacaoAtual);
@@ -558,6 +569,7 @@
                         valor,
                         local,
                         parcela: `${i}/${totalParcelas}`,
+                        recorrente: false,
                         timestamp: serverTimestamp()
                     };
                     await addDoc(collection(db, `/artifacts/${appId}/public/data/saida`), proximaParcela);
@@ -570,7 +582,8 @@
                     categoria,
                     valor,
                     local,
-                    parcela,
+                    parcela: parcela || '',
+                    recorrente: tipo === 'saida' ? recorrente : false, // Salva o status recorrente
                     timestamp: serverTimestamp()
                 };
                 const collectionPath = `/artifacts/${appId}/public/data/${tipo}`;
@@ -593,6 +606,7 @@
             btnSaida.classList.remove('bg-red-500', 'text-white');
             btnSaida.classList.add('bg-gray-300', 'text-gray-800');
             parcelaField.style.display = 'none';
+            recorrenteField.style.display = 'none';
         });
 
         btnSaida.addEventListener('click', () => {
@@ -602,6 +616,7 @@
             btnEntrada.classList.remove('bg-green-500', 'text-white');
             btnEntrada.classList.add('bg-gray-300', 'text-gray-800');
             parcelaField.style.display = 'block';
+            recorrenteField.style.display = 'block';
         });
 
         // Lógica das abas
@@ -691,6 +706,37 @@
             renderizarListas(entradasFiltradas, saidasFiltradas);
             renderizarOrcamento(saidasFiltradas);
         }
+        
+        // Função para verificar se há despesas recorrentes a serem adicionadas
+        async function verificarERegistrarRecorrentes() {
+            // Obtém o mês e ano do mês anterior
+            const hoje = new Date();
+            const mesAnterior = hoje.getMonth() === 0 ? 12 : hoje.getMonth();
+            const anoMesAnterior = hoje.getMonth() === 0 ? hoje.getFullYear() - 1 : hoje.getFullYear();
+
+            // Filtra as despesas recorrentes do mês anterior
+            const recorrentesMesAnterior = saidas.filter(transacao => {
+                const [year, month, day] = transacao.data.split('-').map(Number);
+                return transacao.recorrente && month === mesAnterior && year === anoMesAnterior;
+            });
+
+            // Se houver despesas recorrentes, pergunta ao usuário se ele quer adicioná-las
+            if (recorrentesMesAnterior.length > 0) {
+                const confirmacao = confirm("Deseja adicionar as despesas recorrentes do mês passado?");
+
+                if (confirmacao) {
+                    for (const transacao of recorrentesMesAnterior) {
+                        const novaTransacao = { ...transacao };
+                        delete novaTransacao.id; // Remove o ID do documento
+                        novaTransacao.data = hoje.toISOString().split('T')[0];
+                        novaTransacao.timestamp = serverTimestamp();
+                        
+                        await addDoc(collection(db, `/artifacts/${appId}/public/data/saida`), novaTransacao);
+                    }
+                    alert("Despesas recorrentes adicionadas com sucesso!");
+                }
+            }
+        }
 
         // Inicializa o aplicativo
         window.onload = function() {
@@ -720,6 +766,7 @@
                     const saidasCollection = collection(db, `/artifacts/${appId}/public/data/saida`);
                     onSnapshot(saidasCollection, (snapshot) => {
                         saidas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        verificarERegistrarRecorrentes(); 
                         atualizarUI();
                     });
                 } else {
