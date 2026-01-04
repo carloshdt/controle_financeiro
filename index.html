@@ -4,28 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle Financeiro</title>
-    <!-- Favicon do aplicativo -->
+    <!-- Ícone do separador do navegador (Favicon) -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>">
-    <!-- Incluindo Tailwind CSS para estilização -->
+    <!-- Tailwind CSS para design responsivo e moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        /* Cor de fundo para o farol */
+        body { font-family: 'Inter', sans-serif; }
+        /* Cores de status para o Farol de Orçamento */
         .bg-green-farol { background-color: #4CAF50; }
         .bg-yellow-farol { background-color: #FFC107; }
         .bg-red-farol { background-color: #F44336; }
+        /* Lógica de exibição das abas */
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+        /* Overlay para o modal de edição */
+        .modal-overlay { background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(2px); }
     </style>
 </head>
 <body class="bg-gray-100 p-4 sm:p-8">
     <div class="container mx-auto max-w-7xl">
         <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">Controle Financeiro</h1>
         
-        <!-- Seção de Login e Mensagem do Usuário -->
+        <!-- Autenticação do Utilizador -->
         <div class="flex items-center justify-between flex-wrap gap-4 mb-6 relative">
             <div id="authSection" class="flex items-center gap-4">
                 <button id="googleSignInBtn" class="flex items-center gap-2 py-2 px-4 bg-white text-gray-800 rounded-lg shadow-md hover:bg-gray-100 transition duration-200">
@@ -37,751 +38,503 @@
                     </svg>
                     <span>Login com Google</span>
                 </button>
-                <p id="authMessage" class="text-center text-sm text-gray-500 hidden"></p>
+                <p id="authMessage" class="text-sm text-gray-600 font-medium hidden"></p>
             </div>
-            <button id="logoutBtn" class="py-1 px-2 text-sm text-red-600 hover:text-red-800 transition duration-200 hidden absolute top-0 right-0">
-                Sair
-            </button>
+            <button id="logoutBtn" class="text-sm text-red-600 font-bold hover:underline hidden">Sair</button>
         </div>
         
-        <!-- Seção de Filtro por Mês e Ano -->
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+        <!-- Filtros Globais: Mês, Ano e Importação de Recorrentes -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8 bg-white p-4 rounded-xl shadow-md">
             <div class="flex items-center gap-2">
                 <label for="mes" class="text-gray-700 font-medium">Mês:</label>
-                <select id="mes" class="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <option value="1">Janeiro</option>
-                    <option value="2">Fevereiro</option>
-                    <option value="3">Março</option>
-                    <option value="4">Abril</option>
-                    <option value="5">Maio</option>
-                    <option value="6">Junho</option>
-                    <option value="7">Julho</option>
-                    <option value="8">Agosto</option>
-                    <option value="9">Setembro</option>
-                    <option value="10">Outubro</option>
-                    <option value="11">Novembro</option>
-                    <option value="12">Dezembro</option>
+                <select id="mes" class="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                    <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option>
+                    <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
+                    <option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
+                    <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
                 </select>
             </div>
             <div class="flex items-center gap-2">
                 <label for="ano" class="text-gray-700 font-medium">Ano:</label>
-                <input type="number" id="ano" min="2000" max="2100" class="p-2 border border-gray-300 rounded-lg w-24 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <input type="number" id="ano" min="2000" max="2100" class="p-2 border border-gray-300 rounded-lg w-24">
             </div>
+            <button id="btnImportarRecorrentes" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm font-bold shadow-md">
+                Importar Fixos do Mês Anterior
+            </button>
         </div>
 
-        <!-- Seção de Resumo (agora fixa) -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <!-- Card de Entradas -->
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <div class="flex justify-between items-center mb-2">
-                    <p class="text-gray-500 font-medium">Entradas</p>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
+        <!-- Resumo Financeiro Fixo -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 text-center">
+            <div class="bg-white rounded-xl shadow-lg p-6 border-t-4 border-green-500">
+                <p class="text-gray-500 font-medium">Entradas</p>
                 <p id="totalEntradas" class="text-3xl font-bold text-gray-800">R$ 0,00</p>
             </div>
-            <!-- Card de Saídas -->
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <div class="flex justify-between items-center mb-2">
-                    <p class="text-gray-500 font-medium">Saídas</p>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
+            <div class="bg-white rounded-xl shadow-lg p-6 border-t-4 border-red-500">
+                <p class="text-gray-500 font-medium">Saídas</p>
                 <p id="totalSaidas" class="text-3xl font-bold text-gray-800">R$ 0,00</p>
             </div>
-            <!-- Card de Saldo -->
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <div class="flex justify-between items-center mb-2">
-                    <p class="text-gray-500 font-medium">Saldo do Mês</p>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c1.657 0 3 .895 3 2s-1.343 2-3 2-3 .895-3 2 1.343 2 3 2m0-8c-1.11 0-2.083-.403-2.618-1M12 8c1.11 0 2.083-.403 2.618-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
+            <div class="bg-white rounded-xl shadow-lg p-6 border-t-4 border-indigo-500">
+                <p class="text-gray-500 font-medium">Saldo do Mês</p>
                 <p id="saldoMes" class="text-3xl font-bold text-gray-800">R$ 0,00</p>
             </div>
         </div>
 
-        <!-- Layout principal com painéis para forms e listas -->
+        <!-- Layout Principal: Formulário e Tabelas -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Painel de Adicionar Transações (Entrada e Saída) -->
-            <div class="lg:col-span-1 bg-white rounded-xl shadow-lg p-6">
-                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Adicionar Transação</h2>
+            
+            <!-- Coluna de Inserção de Dados -->
+            <div class="lg:col-span-1 bg-white rounded-xl shadow-lg p-6 h-fit border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Novo Lançamento</h2>
                 
-                <!-- Botões de seleção de tipo de transação -->
-                <div class="flex justify-center gap-4 mb-6">
-                    <button id="btnEntrada" class="flex-1 py-2 px-4 rounded-lg font-semibold bg-green-500 text-white shadow hover:bg-green-600 transition duration-200">
-                        Entrada
-                    </button>
-                    <button id="btnSaida" class="flex-1 py-2 px-4 rounded-lg font-semibold bg-gray-300 text-gray-800 shadow hover:bg-gray-400 transition duration-200">
-                        Saída
-                    </button>
+                <!-- Alternador de Tipo de Transação -->
+                <div class="flex gap-4 mb-6">
+                    <button id="btnEntrada" class="flex-1 py-2 rounded-lg font-bold bg-green-500 text-white shadow-sm border-2 border-green-500">Entrada</button>
+                    <button id="btnSaida" class="flex-1 py-2 rounded-lg font-bold bg-gray-200 text-gray-700 shadow-sm border-2 border-transparent">Saída</button>
                 </div>
 
-                <!-- Formulário de Transação -->
-                <form id="transacaoForm">
+                <form id="transacaoForm" class="space-y-4">
                     <input type="hidden" id="tipoTransacao" value="entrada">
-                    
-                    <div class="mb-4">
-                        <label for="data" class="block text-gray-700 font-medium mb-1">Data</label>
-                        <input type="date" id="data" required class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700">Data</label>
+                        <input type="date" id="data" required class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500">
                     </div>
-                    <div class="mb-4">
-                        <label for="descricao" class="block text-gray-700 font-medium mb-1">Descrição</label>
-                        <input type="text" id="descricao" required class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700">Descrição</label>
+                        <input type="text" id="descricao" required class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="Ex: Salário, Supermercado...">
                     </div>
-                    <div class="mb-4">
-                        <label for="categoria" class="block text-gray-700 font-medium mb-1">Categoria</label>
-                        <select id="categoria" required class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option value="">Selecione uma categoria</option>
-                            <!-- Opções de categoria serão preenchidas via JS -->
-                        </select>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700">Categoria</label>
+                        <select id="categoria" required class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"></select>
                     </div>
-                    <div class="mb-4">
-                        <label for="valor" class="block text-gray-700 font-medium mb-1">Valor</label>
-                        <input type="number" id="valor" step="0.01" required class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700">Valor (R$)</label>
+                        <input type="number" id="valor" step="0.01" required class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="0,00">
                     </div>
-                    <div class="mb-4">
-                        <label for="local" class="block text-gray-700 font-medium mb-1">Local</label>
-                        <input type="text" id="local" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700">Local</label>
+                        <input type="text" id="local" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="Onde gastou?">
                     </div>
-                    <div id="parcelaField" class="mb-4" style="display: none;">
-                        <label for="parcela" class="block text-gray-700 font-medium mb-1">Parcela (Ex: 1/10)</label>
-                        <input type="text" id="parcela" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <div id="parcelaField" class="hidden">
+                        <label class="block text-sm font-semibold text-gray-700">Parcela (Ex: 1/10)</label>
+                        <input type="text" id="parcela" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="Deixe vazio se não for parcelado">
                     </div>
-                    <div id="recorrenteField" class="mb-4" style="display: none;">
-                        <label for="recorrente" class="flex items-center text-gray-700 font-medium">
-                            <input type="checkbox" id="recorrente" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
-                            Recorrente?
-                        </label>
+                    <div id="recorrenteField" class="hidden flex items-center bg-indigo-50 p-2 rounded-lg">
+                        <input type="checkbox" id="recorrente" class="h-5 w-5 text-indigo-600 rounded border-gray-300">
+                        <label for="recorrente" class="ml-2 text-sm font-medium text-indigo-900">Conta fixa mensal (recorrente)?</label>
                     </div>
-                    
-                    <button type="submit" class="w-full bg-indigo-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-indigo-700 transition duration-200">
-                        Adicionar Transação
-                    </button>
+                    <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition shadow-lg">Confirmar Lançamento</button>
                 </form>
             </div>
 
-            <!-- Painel de Listas de Transações e Orçamento -->
-            <div class="lg:col-span-2 flex flex-col gap-8">
-                <!-- Abas de navegação -->
-                <div class="flex border-b border-gray-200">
-                    <button id="tabSaidas" class="flex-1 py-2 px-4 text-center text-gray-600 font-medium hover:bg-gray-200 transition duration-200 focus:outline-none border-b-2 border-indigo-500">Saídas</button>
-                    <button id="tabEntradas" class="flex-1 py-2 px-4 text-center text-gray-600 font-medium hover:bg-gray-200 transition duration-200 focus:outline-none">Entradas</button>
-                    <button id="tabOrcamento" class="flex-1 py-2 px-4 text-center text-gray-600 font-medium hover:bg-gray-200 transition duration-200 focus:outline-none">Orçamento</button>
+            <!-- Coluna de Listagem com Abas -->
+            <div class="lg:col-span-2">
+                <div class="flex border-b border-gray-300 mb-4 bg-white rounded-t-xl shadow-sm">
+                    <button id="tabSaidas" class="flex-1 py-4 font-bold text-indigo-600 border-b-4 border-indigo-600">Saídas</button>
+                    <button id="tabEntradas" class="flex-1 py-4 font-bold text-gray-500 hover:bg-gray-50 transition">Entradas</button>
+                    <button id="tabOrcamento" class="flex-1 py-4 font-bold text-gray-500 hover:bg-gray-50 transition">Farol</button>
                 </div>
 
-                <!-- Conteúdo das abas -->
-                <div id="tabContentWrapper" class="relative">
-                    <!-- Aba de Saídas -->
-                    <div id="saidasContent" class="tab-content active">
-                         <div class="mb-4 flex items-center gap-2">
-                            <label for="filterSaida" class="text-gray-700 font-medium">Filtrar por Categoria:</label>
-                            <select id="filterSaida" class="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                <option value="all">Todas as categorias</option>
-                            </select>
-                        </div>
-                        <div class="bg-white rounded-xl shadow-lg p-6 overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Local</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parcela</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="saidasList" class="bg-white divide-y divide-gray-200">
-                                    <!-- Itens da tabela serão preenchidos via JS -->
-                                </tbody>
-                            </table>
-                        </div>
+                <!-- Conteúdo da Aba: Saídas -->
+                <div id="contentSaidas" class="tab-content active space-y-4">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-medium text-gray-600">Filtrar:</span>
+                        <select id="filterSaida" class="p-2 border rounded-lg w-full sm:w-64 bg-white shadow-sm"></select>
                     </div>
+                    <div class="bg-white rounded-xl shadow-lg border overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 text-sm">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="px-4 py-3 text-left font-bold text-gray-700">Data</th>
+                                    <th class="px-4 py-3 text-left font-bold text-gray-700">Valor</th>
+                                    <th class="px-4 py-3 text-left font-bold text-gray-700">Descrição</th>
+                                    <th class="px-4 py-3 text-left font-bold text-gray-700">Cat.</th>
+                                    <th class="px-4 py-3 text-left font-bold text-gray-700">Local</th>
+                                    <th class="px-4 py-3 text-left font-bold text-gray-700">Ref.</th>
+                                    <th class="px-4 py-3 text-left font-bold text-gray-700">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="saidasList" class="divide-y divide-gray-200"></tbody>
+                        </table>
+                    </div>
+                </div>
 
-                    <!-- Aba de Entradas -->
-                    <div id="entradasContent" class="tab-content">
-                        <div class="mb-4 flex items-center gap-2">
-                            <label for="filterEntrada" class="text-gray-700 font-medium">Filtrar por Categoria:</label>
-                            <select id="filterEntrada" class="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                <option value="all">Todas as categorias</option>
-                            </select>
-                        </div>
-                         <div class="bg-white rounded-xl shadow-lg p-6 overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Local</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="entradasList" class="bg-white divide-y divide-gray-200">
-                                    <!-- Itens da tabela serão preenchidos via JS -->
-                                </tbody>
-                            </table>
-                        </div>
+                <!-- Conteúdo da Aba: Entradas -->
+                <div id="contentEntradas" class="tab-content space-y-4">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-medium text-gray-600">Filtrar:</span>
+                        <select id="filterEntrada" class="p-2 border rounded-lg w-full sm:w-64 bg-white shadow-sm"></select>
                     </div>
+                    <div class="bg-white rounded-xl shadow-lg border overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 text-sm">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="px-4 py-3 text-left font-bold text-gray-700">Data</th>
+                                    <th class="px-4 py-3 text-left font-bold text-gray-700">Valor</th>
+                                    <th class="px-4 py-3 text-left font-bold text-gray-700">Descrição</th>
+                                    <th class="px-4 py-3 text-left font-bold text-gray-700">Cat.</th>
+                                    <th class="px-4 py-3 text-left font-bold text-gray-700">Local</th>
+                                    <th class="px-4 py-3 text-left font-bold text-gray-700">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="entradasList" class="divide-y divide-gray-200"></tbody>
+                        </table>
+                    </div>
+                </div>
 
-                    <!-- Aba de Orçamento -->
-                    <div id="orcamentoContent" class="tab-content">
-                        <div class="bg-white rounded-xl shadow-lg p-6">
-                            <div id="orcamentoList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                <!-- Itens do orçamento serão preenchidos via JS -->
-                            </div>
-                        </div>
-                    </div>
+                <!-- Conteúdo da Aba: Orçamento (Farol) -->
+                <div id="contentOrcamento" class="tab-content">
+                    <div id="orcamentoList" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Firebase SDK Imports -->
+    <!-- Modal para Edição de Transações -->
+    <div id="editModal" class="fixed inset-0 modal-overlay items-center justify-center z-50 hidden p-4">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-md transform transition-all scale-100">
+            <h3 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">Editar Lançamento</h3>
+            <form id="editForm" class="space-y-5">
+                <input type="hidden" id="editId">
+                <input type="hidden" id="editTipo">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Descrição</label>
+                    <input type="text" id="editDescricao" class="w-full p-3 border-2 border-gray-100 rounded-xl focus:border-indigo-500 outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Valor (R$)</label>
+                    <input type="number" id="editValor" step="0.01" class="w-full p-3 border-2 border-gray-100 rounded-xl focus:border-indigo-500 outline-none transition">
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="window.fecharModal()" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold hover:bg-gray-200 transition">Cancelar</button>
+                    <button type="submit" class="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 shadow-lg transition">Atualizar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDK e Lógica do Aplicativo -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // Configuração do seu Firebase (Chave de API em branco conforme política)
         const firebaseConfig = {
-          apiKey: "AIzaSyAd1b6_av2NKg5WDdM03W8m6KuGkxhQpyQ",
-          authDomain: "controle-financeiro-926ca.firebaseapp.com",
-          projectId: "controle-financeiro-926ca",
-          storageBucket: "controle-financeiro-926ca.firebasestorage.app",
-          messagingSenderId: "36138830702",
-          appId: "1:36138830702:web:1455e530174bb08c038f7f"
+            apiKey: "AIzaSyAd1b6_av2NKg5WDdM03W8m6KuGkxhQpyQ",
+            authDomain: "controle-financeiro-926ca.firebaseapp.com",
+            projectId: "controle-financeiro-926ca",
+            storageBucket: "controle-financeiro-926ca.firebasestorage.app",
+            messagingSenderId: "36138830702",
+            appId: "1:36138830702:web:1455e530174bb08c038f7f"
         };
-        
-        // O app ID do seu projeto no Firestore
-        const appId = firebaseConfig.projectId;
 
-        // Inicializa o Firebase com as suas credenciais
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        const googleProvider = new GoogleAuthProvider();
+        const provider = new GoogleAuthProvider();
+        const appId = firebaseConfig.projectId;
+
+        // Memória local para dados
+        let entradas = [], saidas = [];
         
-        let userId = '';
-
-        // Variáveis para as listas de dados
-        let entradas = [];
-        let saidas = [];
-        let recorrentes = []; // Nova variável para despesas recorrentes
-
-        // Referências aos elementos do DOM
-        const tabSaidasBtn = document.getElementById('tabSaidas');
-        const tabEntradasBtn = document.getElementById('tabEntradas');
-        const tabOrcamentoBtn = document.getElementById('tabOrcamento');
-
-        const saidasContent = document.getElementById('saidasContent');
-        const entradasContent = document.getElementById('entradasContent');
-        const orcamentoContent = document.getElementById('orcamentoContent');
-
-        const totalEntradasEl = document.getElementById('totalEntradas');
-        const totalSaidasEl = document.getElementById('totalSaidas');
-        const saldoMesEl = document.getElementById('saldoMes');
-        const entradasListEl = document.getElementById('entradasList');
-        const saidasListEl = document.getElementById('saidasList');
-        const orcamentoListEl = document.getElementById('orcamentoList');
-        const authMessageEl = document.getElementById('authMessage');
-        const mesSelect = document.getElementById('mes');
-        const anoInput = document.getElementById('ano');
-        const googleSignInBtn = document.getElementById('googleSignInBtn');
-        const logoutBtn = document.getElementById('logoutBtn');
-        
-        const filterEntradaSelect = document.getElementById('filterEntrada');
-        const filterSaidaSelect = document.getElementById('filterSaida');
-
-
-        const btnEntrada = document.getElementById('btnEntrada');
-        const btnSaida = document.getElementById('btnSaida');
-        const tipoTransacaoInput = document.getElementById('tipoTransacao');
-        const parcelaField = document.getElementById('parcelaField');
-        const recorrenteField = document.getElementById('recorrenteField');
-        const recorrenteCheckbox = document.getElementById('recorrente');
-        const categoriaSelect = document.getElementById('categoria');
-        const transacaoForm = document.getElementById('transacaoForm');
-        
-        // Categorias e orçamentos definidos na sua planilha
+        // Definição dos Orçamentos Mensais
         const orcamentos = {
-            "Aluguel e condomínio": 5200,
-            "Luz": 800,
-            "Internet": 120,
-            "Carro": 1500,
-            "Cachorros": 600,
-            "Limpeza-Casa": 400,
-            "Lazer": 1000,
-            "Outros": 500,
-            "Pessoal Caique": 1200,
-            "Pessoal Estefanie": 1200,
-            "Pitoco": 5000,
-            "Saúde": 200,
-            "Casa": 500,
-            "Alimentação": 500,
-            "Presente": 200
+            "Aluguel e condomínio": 5200, "Luz": 800, "Internet": 120, "Carro": 1500, "Cachorros": 600,
+            "Limpeza-Casa": 400, "Lazer": 1000, "Outros": 500, "Pessoal Caique": 1200, "Pessoal Estefanie": 1200,
+            "Pitoco": 5000, "Saúde": 200, "Casa": 500, "Alimentação": 500, "Presente": 200
         };
 
-        const categorias = Object.keys(orcamentos);
+        // Utilitários de Formatação
+        const formatMoeda = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+        const formatData = (d) => {
+            if(!d) return "-";
+            const [y, m, day] = d.split('-').map(Number);
+            return `${String(day).padStart(2, '0')}/${String(m).padStart(2, '0')}/${String(y).slice(-2)}`;
+        };
 
-        // Preenche os selects de categoria
-        function preencherCategorias() {
-            categoriaSelect.innerHTML = '';
-            const placeholder = document.createElement('option');
-            placeholder.value = '';
-            placeholder.textContent = 'Selecione uma categoria';
-            placeholder.disabled = true;
-            placeholder.selected = true;
-            categoriaSelect.appendChild(placeholder);
-
-            categorias.forEach(categoria => {
-                const option = document.createElement('option');
-                option.value = categoria;
-                option.textContent = categoria;
-                categoriaSelect.appendChild(option);
-            });
-            
-            // Preenche os filtros das abas
-            const filtroPlaceholder = document.createElement('option');
-            filtroPlaceholder.value = 'all';
-            filtroPlaceholder.textContent = 'Todas as categorias';
-            filterEntradaSelect.appendChild(filtroPlaceholder.cloneNode(true));
-            filterSaidaSelect.appendChild(filtroPlaceholder.cloneNode(true));
-            
-            categorias.forEach(categoria => {
-                const option = document.createElement('option');
-                option.value = categoria;
-                option.textContent = categoria;
-                filterEntradaSelect.appendChild(option.cloneNode(true));
-                filterSaidaSelect.appendChild(option.cloneNode(true));
-            });
-        }
-
-        // Função para filtrar transações por mês e ano
-        function filtrarTransacoes(transacoes, mes, ano) {
-            return transacoes.filter(transacao => {
-                // Constrói a data explicitamente para evitar problemas de fuso horário
-                const [year, month, day] = transacao.data.split('-').map(Number);
-                const data = new Date(year, month - 1, day); // Mês é 0-indexado no construtor Date
-
-                return data.getMonth() + 1 === mes && data.getFullYear() === ano;
-            });
-        }
-        
-        // Função para filtrar transações por categoria
-        function filtrarPorCategoria(transacoes, categoria) {
-            if (categoria === 'all') {
-                return transacoes;
-            }
-            return transacoes.filter(transacao => transacao.categoria === categoria);
-        }
-
-
-        // Atualiza os valores do dashboard
-        function atualizarResumo(entradasFiltradas, saidasFiltradas) {
-            const totalEntradas = entradasFiltradas.reduce((acc, transacao) => acc + transacao.valor, 0);
-            const totalSaidas = saidasFiltradas.reduce((acc, transacao) => acc + transacao.valor, 0);
-            const saldoMes = totalEntradas - totalSaidas;
-
-            totalEntradasEl.textContent = formatarMoeda(totalEntradas);
-            totalSaidasEl.textContent = formatarMoeda(totalSaidas);
-            saldoMesEl.textContent = formatarMoeda(saldoMes);
-
-            // Muda a cor do saldo com base no valor
-            if (saldoMes >= 0) {
-                saldoMesEl.classList.remove('text-red-500');
-                saldoMesEl.classList.add('text-green-500');
-            } else {
-                saldoMesEl.classList.remove('text-green-500');
-                saldoMesEl.classList.add('text-red-500');
-            }
-        }
-
-        // Renderiza as listas de transações
-        function renderizarListas(entradasFiltradas, saidasFiltradas) {
-            // Limpa as tabelas antes de renderizar
-            entradasListEl.innerHTML = '';
-            saidasListEl.innerHTML = '';
-
-            entradasFiltradas.forEach(transacao => {
-                const row = document.createElement('tr');
-                row.classList.add('hover:bg-gray-50');
-                // Formata a data para dd/mm/aa
-                const dataFormatada = formatarData(transacao.data);
-                row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${dataFormatada}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">${formatarMoeda(transacao.valor)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${transacao.descricao}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${transacao.categoria}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${transacao.local}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button onclick="removerTransacao('${transacao.id}', 'entrada')" class="text-red-600 hover:text-red-900 ml-4">
-                            Remover
-                        </button>
-                    </td>
-                `;
-                entradasListEl.appendChild(row);
-            });
-
-            saidasFiltradas.forEach(transacao => {
-                const row = document.createElement('tr');
-                row.classList.add('hover:bg-gray-50');
-                // Formata a data para dd/mm/aa
-                const dataFormatada = formatarData(transacao.data);
-                row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${dataFormatada}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600">${formatarMoeda(transacao.valor)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${transacao.descricao}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${transacao.categoria}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${transacao.local}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${transacao.parcela}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button onclick="removerTransacao('${transacao.id}', 'saida')" class="text-red-600 hover:text-red-900 ml-4">
-                            Remover
-                        </button>
-                    </td>
-                `;
-                saidasListEl.appendChild(row);
-            });
-        }
-
-        // Renderiza a seção de orçamento (Farol)
-        function renderizarOrcamento(saidasFiltradas) {
-            orcamentoListEl.innerHTML = '';
-
-            const gastosPorCategoria = saidasFiltradas.reduce((acc, transacao) => {
-                if (acc[transacao.categoria]) {
-                    acc[transacao.categoria] += transacao.valor;
-                } else {
-                    acc[transacao.categoria] = transacao.valor;
-                }
-                return acc;
-            }, {});
-
-            for (const categoria in orcamentos) {
-                const orcamentoTotal = orcamentos[categoria];
-                const gastoAtual = gastosPorCategoria[categoria] || 0;
-                const porcentagem = (gastoAtual / orcamentoTotal) * 100;
-
-                let corFarol = 'bg-green-farol';
-                if (porcentagem > 100) {
-                    corFarol = 'bg-red-farol';
-                } else if (porcentagem >= 80) {
-                    corFarol = 'bg-yellow-farol';
-                }
-
-                const card = document.createElement('div');
-                card.classList.add('bg-white', 'rounded-xl', 'shadow-md', 'p-4', 'border', 'border-gray-200');
-                card.innerHTML = `
-                    <div class="flex items-center justify-between mb-2">
-                        <p class="text-gray-700 font-semibold">${categoria}</p>
-                        <div class="w-4 h-4 rounded-full ${corFarol} shadow-sm"></div>
-                    </div>
-                    <p class="text-sm text-gray-500">Orçamento: <span class="font-medium">${formatarMoeda(orcamentoTotal)}</span></p>
-                    <p class="text-sm text-gray-500">Gasto: <span class="font-medium">${formatarMoeda(gastoAtual)}</span></p>
-                    <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                        <div class="h-2.5 rounded-full ${corFarol}" style="width: ${Math.min(porcentagem, 100)}%;"></div>
-                    </div>
-                `;
-                orcamentoListEl.appendChild(card);
-            }
-        }
-
-        // Função para remover uma transação
-        async function removerTransacao(transacaoId, tipo) {
-            if (!confirm(`Tem certeza que deseja remover esta transação?`)) {
-                return;
-            }
-
-            try {
-                const docRef = doc(db, `/artifacts/${appId}/public/data/${tipo}`, transacaoId);
-                await deleteDoc(docRef);
-                console.log("Transação removida com sucesso!");
-            } catch (e) {
-                console.error("Erro ao remover documento: ", e);
-            }
-        }
-        
-        window.removerTransacao = removerTransacao; // Torna a função global para ser acessada pelo onclick
-
-        // Adiciona um listener para o formulário de transações
-        transacaoForm.addEventListener('submit', async function(event) {
-            event.preventDefault();
-
-            // Desativa o botão para evitar cliques múltiplos
-            const submitBtn = event.submitter;
-            submitBtn.disabled = true;
-            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
-
-            const tipo = tipoTransacaoInput.value;
-            const data = document.getElementById('data').value;
-            const descricao = document.getElementById('descricao').value;
-            const categoria = document.getElementById('categoria').value;
-            const valor = parseFloat(document.getElementById('valor').value);
-            const local = document.getElementById('local').value;
-            const parcela = document.getElementById('parcela').value;
-            const recorrente = recorrenteCheckbox.checked;
-
-            if (!auth.currentUser) {
-                console.error("Erro ao adicionar documento: Usuário não está logado.");
-                // Reativa o botão
-                submitBtn.disabled = false;
-                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                // Adiciona um modal de alerta personalizado aqui
-                return;
-            }
-
-            // Lógica para parcelamento automático
-            const parcelaRegex = /^(\d+)\/(\d+)$/;
-            const match = parcela.match(parcelaRegex);
-
-            if (tipo === 'saida' && match) {
-                const parcelaAtual = parseInt(match[1]);
-                const totalParcelas = parseInt(match[2]);
-
-                // Adiciona a parcela atual
-                const transacaoAtual = {
-                    data,
-                    descricao,
-                    categoria,
-                    valor,
-                    local,
-                    parcela,
-                    recorrente: false, // Parcelas não são marcadas como recorrentes
-                    timestamp: serverTimestamp()
-                };
-                await addDoc(collection(db, `/artifacts/${appId}/public/data/saida`), transacaoAtual);
-
-                // Gera e adiciona as parcelas futuras
-                for (let i = parcelaAtual + 1; i <= totalParcelas; i++) {
-                    const dataOriginal = new Date(data + 'T00:00:00');
-                    const dataProximaParcela = new Date(dataOriginal);
-                    dataProximaParcela.setMonth(dataOriginal.getMonth() + (i - parcelaAtual));
-                    
-                    const proximaParcela = {
-                        data: dataProximaParcela.toISOString().split('T')[0],
-                        descricao,
-                        categoria,
-                        valor,
-                        local,
-                        parcela: `${i}/${totalParcelas}`,
-                        recorrente: false,
-                        timestamp: serverTimestamp()
-                    };
-                    await addDoc(collection(db, `/artifacts/${appId}/public/data/saida`), proximaParcela);
-                }
-            } else {
-                // Adiciona uma única transação (não parcelada)
-                const novaTransacao = {
-                    data,
-                    descricao,
-                    categoria,
-                    valor,
-                    local,
-                    parcela: parcela || '',
-                    recorrente: tipo === 'saida' ? recorrente : false, // Salva o status recorrente
-                    timestamp: serverTimestamp()
-                };
-                const collectionPath = `/artifacts/${appId}/public/data/${tipo}`;
-                await addDoc(collection(db, collectionPath), novaTransacao);
-            }
-
-            console.log(`Transação(s) adicionada(s) com sucesso.`);
-
-            // Reativa o botão e limpa o formulário
-            submitBtn.disabled = false;
-            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-            transacaoForm.reset();
-        });
-
-        // Adiciona listeners para os botões de seleção de tipo de transação
-        btnEntrada.addEventListener('click', () => {
-            tipoTransacaoInput.value = 'entrada';
-            btnEntrada.classList.remove('bg-gray-300', 'text-gray-800');
-            btnEntrada.classList.add('bg-green-500', 'text-white');
-            btnSaida.classList.remove('bg-red-500', 'text-white');
-            btnSaida.classList.add('bg-gray-300', 'text-gray-800');
-            parcelaField.style.display = 'none';
-            recorrenteField.style.display = 'none';
-        });
-
-        btnSaida.addEventListener('click', () => {
-            tipoTransacaoInput.value = 'saida';
-            btnSaida.classList.remove('bg-gray-300', 'text-gray-800');
-            btnSaida.classList.add('bg-red-500', 'text-white');
-            btnEntrada.classList.remove('bg-green-500', 'text-white');
-            btnEntrada.classList.add('bg-gray-300', 'text-gray-800');
-            parcelaField.style.display = 'block';
-            recorrenteField.style.display = 'block';
-        });
-
-        // Lógica das abas
+        // Lógica de Alternância entre Abas
         const tabs = [
-            { btn: tabSaidasBtn, content: saidasContent },
-            { btn: tabEntradasBtn, content: entradasContent },
-            { btn: tabOrcamentoBtn, content: orcamentoContent }
+            { btn: 'tabSaidas', content: 'contentSaidas' },
+            { btn: 'tabEntradas', content: 'contentEntradas' },
+            { btn: 'tabOrcamento', content: 'contentOrcamento' }
         ];
-
-        function activateTab(activeTab) {
-            tabs.forEach(tab => {
-                tab.btn.classList.remove('border-b-2', 'border-indigo-500');
-                tab.content.classList.remove('active');
-            });
-            activeTab.btn.classList.add('border-b-2', 'border-indigo-500');
-            activeTab.content.classList.add('active');
-        }
-        
-        tabs.forEach(tab => {
-            tab.btn.addEventListener('click', () => activateTab(tab));
+        tabs.forEach(t => {
+            document.getElementById(t.btn).onclick = () => {
+                tabs.forEach(x => {
+                    document.getElementById(x.btn).className = 'flex-1 py-4 font-bold text-gray-500 hover:bg-gray-50 transition';
+                    document.getElementById(x.content).classList.remove('active');
+                });
+                document.getElementById(t.btn).className = 'flex-1 py-4 font-bold text-indigo-600 border-b-4 border-indigo-600 bg-white';
+                document.getElementById(t.content).classList.add('active');
+            };
         });
 
-
-        // Adiciona listeners para o seletor de mês e ano
-        mesSelect.addEventListener('change', atualizarUI);
-        anoInput.addEventListener('change', atualizarUI);
-        filterEntradaSelect.addEventListener('change', atualizarUI);
-        filterSaidaSelect.addEventListener('change', atualizarUI);
-        
-        googleSignInBtn.addEventListener('click', async () => {
-            try {
-                await signInWithPopup(auth, googleProvider);
-            } catch (error) {
-                console.error("Erro no login com Google:", error);
-                authMessageEl.textContent = "Erro ao fazer login. Tente novamente.";
-            }
-        });
-
-        logoutBtn.addEventListener('click', async () => {
-            try {
-                await signOut(auth);
-                console.log("Usuário desconectado.");
-            } catch (error) {
-                console.error("Erro ao fazer logout:", error);
-            }
-        });
-
-        // Função utilitária para formatar valores em moeda
-        function formatarMoeda(valor) {
-            return new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-            }).format(valor);
-        }
-        
-        // Função para formatar data
-        function formatarData(dataString) {
-            // Constrói a data explicitamente para evitar problemas de fuso horário
-            const [year, month, day] = dataString.split('-').map(Number);
-            const date = new Date(year, month - 1, day); // Mês é 0-indexado no construtor Date
-
-            const dia = String(date.getDate()).padStart(2, '0');
-            const mes = String(date.getMonth() + 1).padStart(2, '0');
-            const ano = String(date.getFullYear()).slice(-2);
-            return `${dia}/${mes}/${ano}`;
-        }
-
-        // Função principal para atualizar toda a interface
-        function atualizarUI() {
-            const mes = parseInt(mesSelect.value);
-            const ano = parseInt(anoInput.value);
-            const categoriaEntrada = filterEntradaSelect.value;
-            const categoriaSaida = filterSaidaSelect.value;
-
-
-            // Ordena as transações por data de forma decrescente
-            const entradasOrdenadas = entradas.sort((a, b) => new Date(b.data) - new Date(a.data));
-            const saidasOrdenadas = saidas.sort((a, b) => new Date(b.data) - new Date(a.data));
+        // Inicialização dos Seletores (Combobox)
+        function initSelects() {
+            const cats = Object.keys(orcamentos);
+            const catSel = document.getElementById('categoria');
+            const filEnt = document.getElementById('filterEntrada');
+            const filSai = document.getElementById('filterSaida');
             
-            const entradasFiltradasMesAno = filtrarTransacoes(entradasOrdenadas, mes, ano);
-            const saidasFiltradasMesAno = filtrarTransacoes(saidasOrdenadas, mes, ano);
-
-            const entradasFiltradas = filtrarPorCategoria(entradasFiltradasMesAno, categoriaEntrada);
-            const saidasFiltradas = filtrarPorCategoria(saidasFiltradasMesAno, categoriaSaida);
-            
-            atualizarResumo(entradasFiltradas, saidasFiltradas);
-            renderizarListas(entradasFiltradas, saidasFiltradas);
-            renderizarOrcamento(saidasFiltradas);
+            catSel.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
+            const filterOptions = '<option value="all">Todas as Categorias</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+            filEnt.innerHTML = filterOptions;
+            filSai.innerHTML = filterOptions;
         }
-        
-        // Função para verificar se há despesas recorrentes a serem adicionadas
-        async function verificarERegistrarRecorrentes() {
-            // Obtém o mês e ano do mês anterior
-            const hoje = new Date();
-            const mesAnterior = hoje.getMonth() === 0 ? 12 : hoje.getMonth();
-            const anoMesAnterior = hoje.getMonth() === 0 ? hoje.getFullYear() - 1 : hoje.getFullYear();
 
-            // Filtra as despesas recorrentes do mês anterior
-            const recorrentesMesAnterior = saidas.filter(transacao => {
-                const [year, month, day] = transacao.data.split('-').map(Number);
-                return transacao.recorrente && month === mesAnterior && year === anoMesAnterior;
-            });
+        // Renderização Total da Interface
+        async function render() {
+            const mes = parseInt(document.getElementById('mes').value);
+            const ano = parseInt(document.getElementById('ano').value);
+            const fEnt = document.getElementById('filterEntrada').value;
+            const fSai = document.getElementById('filterSaida').value;
 
-            // Se houver despesas recorrentes, pergunta ao usuário se ele quer adicioná-las
-            if (recorrentesMesAnterior.length > 0) {
-                const confirmacao = confirm("Deseja adicionar as despesas recorrentes do mês passado?");
+            // Filtro por Data e Categoria
+            const filterFn = (list, cat) => list.filter(t => {
+                const [y, m] = t.data.split('-').map(Number);
+                return y === ano && m === mes && (cat === 'all' || t.categoria === cat);
+            }).sort((a, b) => new Date(b.data) - new Date(a.data));
 
-                if (confirmacao) {
-                    for (const transacao of recorrentesMesAnterior) {
-                        const novaTransacao = { ...transacao };
-                        delete novaTransacao.id; // Remove o ID do documento
-                        novaTransacao.data = hoje.toISOString().split('T')[0];
-                        novaTransacao.timestamp = serverTimestamp();
-                        
-                        await addDoc(collection(db, `/artifacts/${appId}/public/data/saida`), novaTransacao);
-                    }
-                    alert("Despesas recorrentes adicionadas com sucesso!");
+            const entFil = filterFn(entradas, fEnt);
+            const saiFil = filterFn(saidas, fSai);
+
+            // Atualização do Resumo Financeiro
+            const tEnt = entFil.reduce((s, t) => s + t.valor, 0);
+            const tSai = saiFil.reduce((s, t) => s + t.valor, 0);
+            document.getElementById('totalEntradas').textContent = formatMoeda(tEnt);
+            document.getElementById('totalSaidas').textContent = formatMoeda(tSai);
+            document.getElementById('saldoMes').textContent = formatMoeda(tEnt - tSai);
+
+            // Tabela de Entradas
+            document.getElementById('entradasList').innerHTML = entFil.map(t => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3">${formatData(t.data)}</td>
+                    <td class="px-4 py-3 text-green-600 font-bold">${formatMoeda(t.valor)}</td>
+                    <td class="px-4 py-3">${t.descricao}</td>
+                    <td class="px-4 py-3">${t.categoria}</td>
+                    <td class="px-4 py-3">${t.local || '-'}</td>
+                    <td class="px-4 py-3 flex gap-2">
+                        <button onclick="window.abrirEditar('${t.id}', 'entrada', ${t.valor}, '${t.descricao}')" class="bg-blue-100 text-blue-600 px-2 py-1 rounded font-bold hover:bg-blue-200">Editar</button>
+                        <button onclick="window.remover('${t.id}', 'entrada')" class="bg-red-100 text-red-600 px-2 py-1 rounded font-bold hover:bg-red-200">X</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Tabela de Saídas
+            document.getElementById('saidasList').innerHTML = saiFil.map(t => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3">${formatData(t.data)}</td>
+                    <td class="px-4 py-3 text-red-600 font-bold">${formatMoeda(t.valor)}</td>
+                    <td class="px-4 py-3 font-medium">${t.descricao}</td>
+                    <td class="px-4 py-3 text-gray-500">${t.categoria}</td>
+                    <td class="px-4 py-3 text-gray-500">${t.local || '-'}</td>
+                    <td class="px-4 py-3">${t.parcela ? `<span class='bg-orange-100 text-orange-700 px-2 rounded font-bold'>${t.parcela}</span>` : (t.recorrente ? '<span class="bg-indigo-100 text-indigo-700 px-2 rounded font-bold text-xs uppercase">FIXO</span>' : '-')}</td>
+                    <td class="px-4 py-3 flex gap-2">
+                        <button onclick="window.abrirEditar('${t.id}', 'saida', ${t.valor}, '${t.descricao}')" class="bg-blue-100 text-blue-600 px-2 py-1 rounded font-bold hover:bg-blue-200">Editar</button>
+                        <button onclick="window.remover('${t.id}', 'saida')" class="bg-red-100 text-red-600 px-2 py-1 rounded font-bold hover:bg-red-200">X</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Aba do Farol de Orçamento
+            const gastosCat = saidas.filter(t => {
+                const [y, m] = t.data.split('-').map(Number);
+                return y === ano && m === mes;
+            }).reduce((acc, t) => { acc[t.categoria] = (acc[t.categoria] || 0) + t.valor; return acc; }, {});
+
+            document.getElementById('orcamentoList').innerHTML = Object.entries(orcamentos).map(([cat, limite]) => {
+                const gasto = gastosCat[cat] || 0;
+                const perc = Math.min((gasto / limite) * 100, 100);
+                const cor = perc >= 100 ? 'bg-red-farol' : (perc >= 80 ? 'bg-yellow-farol' : 'bg-green-farol');
+                return `
+                    <div class="bg-white p-4 rounded-xl shadow border border-gray-100">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-bold text-gray-700">${cat}</span>
+                            <div class="w-3 h-3 rounded-full ${cor} shadow-sm"></div>
+                        </div>
+                        <p class="text-xs text-gray-500">Limite: ${formatMoeda(limite)} | Gasto: ${formatMoeda(gasto)}</p>
+                        <div class="w-full bg-gray-200 h-2 rounded-full mt-2"><div class="h-full rounded-full ${cor} transition-all duration-500" style="width:${perc}%"></div></div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Funções de Gestão (Disponíveis em window para o HTML)
+        window.remover = async (id, tipo) => {
+            if(confirm('Tem certeza que deseja apagar este registro permanentemente?')) {
+                try {
+                    await deleteDoc(doc(db, `artifacts/${appId}/public/data/${tipo}`, id));
+                } catch (e) {
+                    console.error("Erro ao remover:", e);
                 }
             }
-        }
+        };
 
-        // Inicializa o aplicativo
-        window.onload = function() {
-            preencherCategorias();
-            
-            // Define o mês e ano atuais como padrão
-            const hoje = new Date();
-            mesSelect.value = hoje.getMonth() + 1;
-            anoInput.value = hoje.getFullYear();
+        window.abrirEditar = (id, tipo, valor, desc) => {
+            document.getElementById('editId').value = id;
+            document.getElementById('editTipo').value = tipo;
+            document.getElementById('editValor').value = valor;
+            document.getElementById('editDescricao').value = desc;
+            const modal = document.getElementById('editModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        };
 
-            // Monitora o estado de autenticação do usuário
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    userId = user.uid;
-                    authMessageEl.textContent = `Logado como: ${user.displayName}. Dados compartilhados.`;
-                    authMessageEl.classList.remove('hidden');
-                    googleSignInBtn.style.display = 'none';
-                    logoutBtn.style.display = 'block';
-                    
-                    // Conecta aos listeners de tempo real da nova coleção pública
-                    const entradasCollection = collection(db, `/artifacts/${appId}/public/data/entrada`);
-                    onSnapshot(entradasCollection, (snapshot) => {
-                        entradas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                        atualizarUI();
-                    });
+        window.fecharModal = () => {
+            const modal = document.getElementById('editModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        };
 
-                    const saidasCollection = collection(db, `/artifacts/${appId}/public/data/saida`);
-                    onSnapshot(saidasCollection, (snapshot) => {
-                        saidas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                        verificarERegistrarRecorrentes(); 
-                        atualizarUI();
-                    });
+        // Submissão do Formulário de Edição
+        document.getElementById('editForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editId').value;
+            const tipo = document.getElementById('editTipo').value;
+            const valor = parseFloat(document.getElementById('editValor').value);
+            const descricao = document.getElementById('editDescricao').value;
+            try {
+                await updateDoc(doc(db, `artifacts/${appId}/public/data/${tipo}`, id), { valor, descricao });
+                window.fecharModal();
+            } catch (e) {
+                console.error("Erro ao atualizar:", e);
+            }
+        };
+
+        // Submissão do Novo Lançamento
+        document.getElementById('transacaoForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const tipo = document.getElementById('tipoTransacao').value;
+            const baseData = {
+                data: document.getElementById('data').value,
+                descricao: document.getElementById('descricao').value,
+                categoria: document.getElementById('categoria').value,
+                valor: parseFloat(document.getElementById('valor').value),
+                local: document.getElementById('local').value,
+                timestamp: serverTimestamp()
+            };
+
+            const parc = document.getElementById('parcela').value;
+            const rec = document.getElementById('recorrente').checked;
+
+            try {
+                if (tipo === 'saida') {
+                    const match = parc.match(/^(\d+)\/(\d+)$/);
+                    if (match) {
+                        // Lógica de Parcelamento Automático
+                        const atual = parseInt(match[1]), total = parseInt(match[2]);
+                        for (let i = atual; i <= total; i++) {
+                            const d = new Date(baseData.data + 'T00:00:00');
+                            d.setMonth(d.getMonth() + (i - atual));
+                            await addDoc(collection(db, `artifacts/${appId}/public/data/saida`), {
+                                ...baseData,
+                                data: d.toISOString().split('T')[0],
+                                parcela: `${i}/${total}`,
+                                recorrente: false
+                            });
+                        }
+                    } else {
+                        // Lançamento Único ou Fixo
+                        await addDoc(collection(db, `artifacts/${appId}/public/data/saida`), { ...baseData, parcela: '', recorrente: rec });
+                    }
                 } else {
-                    // Usuário desconectado
-                    userId = '';
-                    authMessageEl.textContent = 'Por favor, faça login para salvar seus dados.';
-                    authMessageEl.classList.remove('hidden');
-                    googleSignInBtn.style.display = 'flex';
-                    logoutBtn.style.display = 'none';
-                    entradas = [];
-                    saidas = [];
-                    atualizarUI();
+                    await addDoc(collection(db, `artifacts/${appId}/public/data/entrada`), baseData);
+                }
+                e.target.reset();
+                document.getElementById('data').value = new Date().toISOString().split('T')[0];
+            } catch (e) {
+                console.error("Erro ao salvar:", e);
+            }
+        };
+
+        // Lógica para Importação de Gastos Fixos (Recorrentes)
+        document.getElementById('btnImportarRecorrentes').onclick = async () => {
+            const mesAtual = parseInt(document.getElementById('mes').value);
+            const anoAtual = parseInt(document.getElementById('ano').value);
+            const mesAnt = mesAtual === 1 ? 12 : mesAtual - 1;
+            const anoAnt = mesAtual === 1 ? anoAtual - 1 : anoAtual;
+
+            const recsAnt = saidas.filter(s => {
+                const [y, m] = s.data.split('-').map(Number);
+                return s.recorrente && y === anoAnt && m === mesAnt;
+            });
+
+            if (recsAnt.length === 0) return alert("Não existem contas fixas assinaladas no mês anterior.");
+            
+            if (confirm(`Encontrei ${recsAnt.length} contas fixas. Lançar para o mês ${mesAtual}/${anoAtual}?`)) {
+                for (const r of recsAnt) {
+                    const diaOriginal = r.data.split('-')[2];
+                    const novaData = `${anoAtual}-${String(mesAtual).padStart(2, '0')}-${diaOriginal}`;
+                    const existe = saidas.some(s => s.descricao === r.descricao && s.data === novaData);
+                    if (!existe) {
+                        const { id, ...data } = r;
+                        await addDoc(collection(db, `artifacts/${appId}/public/data/saida`), {
+                            ...data,
+                            data: novaData,
+                            timestamp: serverTimestamp()
+                        });
+                    }
+                }
+                alert("Fixos importados com sucesso!");
+            }
+        };
+
+        // Lógica de Estética dos Botões de Entrada/Saída
+        document.getElementById('btnEntrada').onclick = () => {
+            document.getElementById('tipoTransacao').value = 'entrada';
+            document.getElementById('btnEntrada').className = 'flex-1 py-2 rounded-lg font-bold bg-green-500 text-white shadow-sm border-2 border-green-500';
+            document.getElementById('btnSaida').className = 'flex-1 py-2 rounded-lg font-bold bg-gray-200 text-gray-700 shadow-sm border-2 border-transparent';
+            document.getElementById('parcelaField').classList.add('hidden');
+            document.getElementById('recorrenteField').classList.add('hidden');
+        };
+        document.getElementById('btnSaida').onclick = () => {
+            document.getElementById('tipoTransacao').value = 'saida';
+            document.getElementById('btnSaida').className = 'flex-1 py-2 rounded-lg font-bold bg-red-500 text-white shadow-sm border-2 border-red-500';
+            document.getElementById('btnEntrada').className = 'flex-1 py-2 rounded-lg font-bold bg-gray-200 text-gray-700 shadow-sm border-2 border-transparent';
+            document.getElementById('parcelaField').classList.remove('hidden');
+            document.getElementById('recorrenteField').classList.remove('hidden');
+        };
+
+        const triggerRender = () => render();
+        ['mes', 'ano', 'filterEntrada', 'filterSaida'].forEach(id => document.getElementById(id).onchange = triggerRender);
+
+        // Inicialização do Firebase e Listeners
+        window.onload = () => {
+            initSelects();
+            const hoje = new Date();
+            document.getElementById('mes').value = hoje.getMonth() + 1;
+            document.getElementById('ano').value = hoje.getFullYear();
+            document.getElementById('data').value = hoje.toISOString().split('T')[0];
+
+            onAuthStateChanged(auth, user => {
+                if (user) {
+                    document.getElementById('authMessage').textContent = `Conectado: ${user.displayName}`;
+                    document.getElementById('authMessage').classList.remove('hidden');
+                    document.getElementById('googleSignInBtn').classList.add('hidden');
+                    document.getElementById('logoutBtn').classList.remove('hidden');
+
+                    // Listener para Entradas
+                    onSnapshot(collection(db, `artifacts/${appId}/public/data/entrada`), s => {
+                        entradas = s.docs.map(d => ({ id: d.id, ...d.data() }));
+                        render();
+                    }, (err) => console.error("Erro entradas:", err));
+
+                    // Listener para Saídas
+                    onSnapshot(collection(db, `artifacts/${appId}/public/data/saida`), s => {
+                        saidas = s.docs.map(d => ({ id: d.id, ...d.data() }));
+                        render();
+                    }, (err) => console.error("Erro saídas:", err));
+                } else {
+                    document.getElementById('authMessage').classList.add('hidden');
+                    document.getElementById('googleSignInBtn').classList.remove('hidden');
+                    document.getElementById('logoutBtn').classList.add('hidden');
+                    entradas = []; saidas = []; render();
                 }
             });
         };
+
+        document.getElementById('googleSignInBtn').onclick = () => signInWithPopup(auth, provider);
+        document.getElementById('logoutBtn').onclick = () => signOut(auth);
     </script>
 </body>
 </html>
