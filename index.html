@@ -43,8 +43,8 @@
             <button id="logoutBtn" class="text-sm text-red-600 font-bold hover:underline hidden">Sair</button>
         </div>
         
-        <!-- Filtros Globais: Mês, Ano e Importação de Recorrentes -->
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8 bg-white p-4 rounded-xl shadow-md">
+        <!-- Filtros Globais -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8 bg-white p-4 rounded-xl shadow-md border border-gray-100">
             <div class="flex items-center gap-2">
                 <label for="mes" class="text-gray-700 font-medium">Mês:</label>
                 <select id="mes" class="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
@@ -79,17 +79,16 @@
             </div>
         </div>
 
-        <!-- Layout Principal: Formulário e Tabelas -->
+        <!-- Layout Principal -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            <!-- Coluna de Inserção de Dados -->
+            <!-- Coluna de Lançamento -->
             <div class="lg:col-span-1 bg-white rounded-xl shadow-lg p-6 h-fit border border-gray-200">
                 <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Novo Lançamento</h2>
                 
-                <!-- Alternador de Tipo de Transação -->
                 <div class="flex gap-4 mb-6">
                     <button id="btnEntrada" class="flex-1 py-2 rounded-lg font-bold bg-green-500 text-white shadow-sm border-2 border-green-500">Entrada</button>
-                    <button id="btnSaida" class="flex-1 py-2 rounded-lg font-bold bg-gray-200 text-gray-700 shadow-sm border-2 border-transparent">Saída</button>
+                    <button id="btnSaida" class="flex-1 py-2 rounded-lg font-bold bg-gray-200 text-gray-700 shadow-sm border-2 border-transparent transition">Saída</button>
                 </div>
 
                 <form id="transacaoForm" class="space-y-4">
@@ -100,7 +99,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700">Descrição</label>
-                        <input type="text" id="descricao" required class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="Ex: Salário, Supermercado...">
+                        <input type="text" id="descricao" required class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700">Categoria</label>
@@ -108,38 +107,34 @@
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700">Valor (R$)</label>
-                        <input type="number" id="valor" step="0.01" required class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="0,00">
+                        <input type="number" id="valor" step="0.01" required class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700">Local</label>
-                        <input type="text" id="local" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="Onde gastou?">
+                        <input type="text" id="local" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div id="parcelaField" class="hidden">
                         <label class="block text-sm font-semibold text-gray-700">Parcela (Ex: 1/10)</label>
-                        <input type="text" id="parcela" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="Deixe vazio se não for parcelado">
+                        <input type="text" id="parcela" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div id="recorrenteField" class="hidden flex items-center bg-indigo-50 p-2 rounded-lg">
                         <input type="checkbox" id="recorrente" class="h-5 w-5 text-indigo-600 rounded border-gray-300">
-                        <label for="recorrente" class="ml-2 text-sm font-medium text-indigo-900">Conta fixa mensal (recorrente)?</label>
+                        <label for="recorrente" class="ml-2 text-sm font-medium text-indigo-900">Conta fixa mensal?</label>
                     </div>
                     <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition shadow-lg">Confirmar Lançamento</button>
                 </form>
             </div>
 
-            <!-- Coluna de Listagem com Abas -->
+            <!-- Coluna de Listagem -->
             <div class="lg:col-span-2">
-                <div class="flex border-b border-gray-300 mb-4 bg-white rounded-t-xl shadow-sm">
-                    <button id="tabSaidas" class="flex-1 py-4 font-bold text-indigo-600 border-b-4 border-indigo-600">Saídas</button>
+                <div class="flex border-b border-gray-300 mb-4 bg-white rounded-t-xl shadow-sm overflow-hidden">
+                    <button id="tabSaidas" class="flex-1 py-4 font-bold text-indigo-600 border-b-4 border-indigo-600 bg-white">Saídas</button>
                     <button id="tabEntradas" class="flex-1 py-4 font-bold text-gray-500 hover:bg-gray-50 transition">Entradas</button>
                     <button id="tabOrcamento" class="flex-1 py-4 font-bold text-gray-500 hover:bg-gray-50 transition">Farol</button>
                 </div>
 
-                <!-- Conteúdo da Aba: Saídas -->
                 <div id="contentSaidas" class="tab-content active space-y-4">
-                    <div class="flex items-center gap-2">
-                        <span class="text-sm font-medium text-gray-600">Filtrar:</span>
-                        <select id="filterSaida" class="p-2 border rounded-lg w-full sm:w-64 bg-white shadow-sm"></select>
-                    </div>
+                    <select id="filterSaida" class="p-2 border rounded-lg w-full sm:w-64 bg-white shadow-sm"></select>
                     <div class="bg-white rounded-xl shadow-lg border overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 text-sm">
                             <thead class="bg-gray-100">
@@ -158,12 +153,8 @@
                     </div>
                 </div>
 
-                <!-- Conteúdo da Aba: Entradas -->
                 <div id="contentEntradas" class="tab-content space-y-4">
-                    <div class="flex items-center gap-2">
-                        <span class="text-sm font-medium text-gray-600">Filtrar:</span>
-                        <select id="filterEntrada" class="p-2 border rounded-lg w-full sm:w-64 bg-white shadow-sm"></select>
-                    </div>
+                    <select id="filterEntrada" class="p-2 border rounded-lg w-full sm:w-64 bg-white shadow-sm"></select>
                     <div class="bg-white rounded-xl shadow-lg border overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 text-sm">
                             <thead class="bg-gray-100">
@@ -181,7 +172,6 @@
                     </div>
                 </div>
 
-                <!-- Conteúdo da Aba: Orçamento (Farol) -->
                 <div id="contentOrcamento" class="tab-content">
                     <div id="orcamentoList" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
                 </div>
@@ -189,36 +179,65 @@
         </div>
     </div>
 
-    <!-- Modal para Edição de Transações -->
+    <!-- Modal de Edição Completa -->
     <div id="editModal" class="fixed inset-0 modal-overlay items-center justify-center z-50 hidden p-4">
-        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-md transform transition-all scale-100">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-lg transform transition-all overflow-y-auto max-h-[90vh]">
             <h3 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">Editar Lançamento</h3>
-            <form id="editForm" class="space-y-5">
+            <form id="editForm" class="space-y-4">
                 <input type="hidden" id="editId">
                 <input type="hidden" id="editTipo">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Data</label>
+                        <input type="date" id="editData" required class="w-full p-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Valor (R$)</label>
+                        <input type="number" id="editValor" step="0.01" required class="w-full p-2 border rounded-lg">
+                    </div>
+                </div>
+
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-1">Descrição</label>
-                    <input type="text" id="editDescricao" class="w-full p-3 border-2 border-gray-100 rounded-xl focus:border-indigo-500 outline-none transition">
+                    <input type="text" id="editDescricao" required class="w-full p-2 border rounded-lg">
                 </div>
+
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Valor (R$)</label>
-                    <input type="number" id="editValor" step="0.01" class="w-full p-3 border-2 border-gray-100 rounded-xl focus:border-indigo-500 outline-none transition">
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Categoria</label>
+                    <select id="editCategoria" required class="w-full p-2 border rounded-lg"></select>
                 </div>
-                <div class="flex gap-3 pt-2">
-                    <button type="button" onclick="window.fecharModal()" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold hover:bg-gray-200 transition">Cancelar</button>
-                    <button type="submit" class="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 shadow-lg transition">Atualizar</button>
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Local</label>
+                    <input type="text" id="editLocal" class="w-full p-2 border rounded-lg">
+                </div>
+
+                <div id="editExtraFields" class="space-y-4 pt-2 border-t border-gray-100">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Parcela</label>
+                        <input type="text" id="editParcela" class="w-full p-2 border rounded-lg">
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="editRecorrente" class="h-5 w-5 text-indigo-600 rounded">
+                        <label for="editRecorrente" class="ml-2 text-sm font-medium">É recorrente mensal?</label>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-6">
+                    <button type="button" onclick="window.fecharModal()" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold hover:bg-gray-200">Cancelar</button>
+                    <button type="submit" class="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 shadow-lg transition">Atualizar Dados</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Firebase SDK e Lógica do Aplicativo -->
+    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Configuração do seu Firebase (Chave de API em branco conforme política)
         const firebaseConfig = {
             apiKey: "AIzaSyAd1b6_av2NKg5WDdM03W8m6KuGkxhQpyQ",
             authDomain: "controle-financeiro-926ca.firebaseapp.com",
@@ -234,17 +253,13 @@
         const provider = new GoogleAuthProvider();
         const appId = firebaseConfig.projectId;
 
-        // Memória local para dados
         let entradas = [], saidas = [];
-        
-        // Definição dos Orçamentos Mensais
         const orcamentos = {
             "Aluguel e condomínio": 5200, "Luz": 800, "Internet": 120, "Carro": 1500, "Cachorros": 600,
             "Limpeza-Casa": 400, "Lazer": 1000, "Outros": 500, "Pessoal Caique": 1200, "Pessoal Estefanie": 1200,
             "Pitoco": 5000, "Saúde": 200, "Casa": 500, "Alimentação": 500, "Presente": 200
         };
 
-        // Utilitários de Formatação
         const formatMoeda = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
         const formatData = (d) => {
             if(!d) return "-";
@@ -252,7 +267,7 @@
             return `${String(day).padStart(2, '0')}/${String(m).padStart(2, '0')}/${String(y).slice(-2)}`;
         };
 
-        // Lógica de Alternância entre Abas
+        // Tabs
         const tabs = [
             { btn: 'tabSaidas', content: 'contentSaidas' },
             { btn: 'tabEntradas', content: 'contentEntradas' },
@@ -269,27 +284,30 @@
             };
         });
 
-        // Inicialização dos Seletores (Combobox)
+        // Dropdowns
         function initSelects() {
             const cats = Object.keys(orcamentos);
             const catSel = document.getElementById('categoria');
+            const editCatSel = document.getElementById('editCategoria');
             const filEnt = document.getElementById('filterEntrada');
             const filSai = document.getElementById('filterSaida');
             
-            catSel.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
-            const filterOptions = '<option value="all">Todas as Categorias</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+            const options = cats.map(c => `<option value="${c}">${c}</option>`).join('');
+            catSel.innerHTML = options;
+            editCatSel.innerHTML = options;
+            
+            const filterOptions = '<option value="all">Todas as Categorias</option>' + options;
             filEnt.innerHTML = filterOptions;
             filSai.innerHTML = filterOptions;
         }
 
-        // Renderização Total da Interface
+        // Render UI
         async function render() {
             const mes = parseInt(document.getElementById('mes').value);
             const ano = parseInt(document.getElementById('ano').value);
             const fEnt = document.getElementById('filterEntrada').value;
             const fSai = document.getElementById('filterSaida').value;
 
-            // Filtro por Data e Categoria
             const filterFn = (list, cat) => list.filter(t => {
                 const [y, m] = t.data.split('-').map(Number);
                 return y === ano && m === mes && (cat === 'all' || t.categoria === cat);
@@ -298,45 +316,39 @@
             const entFil = filterFn(entradas, fEnt);
             const saiFil = filterFn(saidas, fSai);
 
-            // Atualização do Resumo Financeiro
-            const tEnt = entFil.reduce((s, t) => s + t.valor, 0);
-            const tSai = saiFil.reduce((s, t) => s + t.valor, 0);
-            document.getElementById('totalEntradas').textContent = formatMoeda(tEnt);
-            document.getElementById('totalSaidas').textContent = formatMoeda(tSai);
-            document.getElementById('saldoMes').textContent = formatMoeda(tEnt - tSai);
+            document.getElementById('totalEntradas').textContent = formatMoeda(entFil.reduce((s, t) => s + t.valor, 0));
+            document.getElementById('totalSaidas').textContent = formatMoeda(saiFil.reduce((s, t) => s + t.valor, 0));
+            document.getElementById('saldoMes').textContent = formatMoeda(entFil.reduce((s, t) => s + t.valor, 0) - saiFil.reduce((s, t) => s + t.valor, 0));
 
-            // Tabela de Entradas
             document.getElementById('entradasList').innerHTML = entFil.map(t => `
-                <tr class="hover:bg-gray-50">
+                <tr class="hover:bg-gray-50 transition">
                     <td class="px-4 py-3">${formatData(t.data)}</td>
                     <td class="px-4 py-3 text-green-600 font-bold">${formatMoeda(t.valor)}</td>
                     <td class="px-4 py-3">${t.descricao}</td>
                     <td class="px-4 py-3">${t.categoria}</td>
                     <td class="px-4 py-3">${t.local || '-'}</td>
                     <td class="px-4 py-3 flex gap-2">
-                        <button onclick="window.abrirEditar('${t.id}', 'entrada', ${t.valor}, '${t.descricao}')" class="bg-blue-100 text-blue-600 px-2 py-1 rounded font-bold hover:bg-blue-200">Editar</button>
+                        <button onclick="window.abrirEditar('${t.id}', 'entrada')" class="bg-blue-100 text-blue-600 px-2 py-1 rounded font-bold hover:bg-blue-200 transition">Editar</button>
                         <button onclick="window.remover('${t.id}', 'entrada')" class="bg-red-100 text-red-600 px-2 py-1 rounded font-bold hover:bg-red-200">X</button>
                     </td>
                 </tr>
             `).join('');
 
-            // Tabela de Saídas
             document.getElementById('saidasList').innerHTML = saiFil.map(t => `
-                <tr class="hover:bg-gray-50">
+                <tr class="hover:bg-gray-50 transition">
                     <td class="px-4 py-3">${formatData(t.data)}</td>
                     <td class="px-4 py-3 text-red-600 font-bold">${formatMoeda(t.valor)}</td>
                     <td class="px-4 py-3 font-medium">${t.descricao}</td>
                     <td class="px-4 py-3 text-gray-500">${t.categoria}</td>
                     <td class="px-4 py-3 text-gray-500">${t.local || '-'}</td>
-                    <td class="px-4 py-3">${t.parcela ? `<span class='bg-orange-100 text-orange-700 px-2 rounded font-bold'>${t.parcela}</span>` : (t.recorrente ? '<span class="bg-indigo-100 text-indigo-700 px-2 rounded font-bold text-xs uppercase">FIXO</span>' : '-')}</td>
+                    <td class="px-4 py-3">${t.parcela ? `<span class='bg-orange-100 text-orange-700 px-2 rounded font-bold text-xs'>${t.parcela}</span>` : (t.recorrente ? '<span class="bg-indigo-100 text-indigo-700 px-2 rounded font-bold text-[10px] uppercase">FIXO</span>' : '-')}</td>
                     <td class="px-4 py-3 flex gap-2">
-                        <button onclick="window.abrirEditar('${t.id}', 'saida', ${t.valor}, '${t.descricao}')" class="bg-blue-100 text-blue-600 px-2 py-1 rounded font-bold hover:bg-blue-200">Editar</button>
+                        <button onclick="window.abrirEditar('${t.id}', 'saida')" class="bg-blue-100 text-blue-600 px-2 py-1 rounded font-bold hover:bg-blue-200 transition">Editar</button>
                         <button onclick="window.remover('${t.id}', 'saida')" class="bg-red-100 text-red-600 px-2 py-1 rounded font-bold hover:bg-red-200">X</button>
                     </td>
                 </tr>
             `).join('');
 
-            // Aba do Farol de Orçamento
             const gastosCat = saidas.filter(t => {
                 const [y, m] = t.data.split('-').map(Number);
                 return y === ano && m === mes;
@@ -359,22 +371,35 @@
             }).join('');
         }
 
-        // Funções de Gestão (Disponíveis em window para o HTML)
+        // Global functions for HTML access
         window.remover = async (id, tipo) => {
-            if(confirm('Tem certeza que deseja apagar este registro permanentemente?')) {
-                try {
-                    await deleteDoc(doc(db, `artifacts/${appId}/public/data/${tipo}`, id));
-                } catch (e) {
-                    console.error("Erro ao remover:", e);
-                }
+            if(confirm('Apagar este registro permanentemente?')) {
+                await deleteDoc(doc(db, `artifacts/${appId}/public/data/${tipo}`, id));
             }
         };
 
-        window.abrirEditar = (id, tipo, valor, desc) => {
+        window.abrirEditar = (id, tipo) => {
+            const list = tipo === 'entrada' ? entradas : saidas;
+            const item = list.find(t => t.id === id);
+            if(!item) return;
+
             document.getElementById('editId').value = id;
             document.getElementById('editTipo').value = tipo;
-            document.getElementById('editValor').value = valor;
-            document.getElementById('editDescricao').value = desc;
+            document.getElementById('editData').value = item.data;
+            document.getElementById('editDescricao').value = item.descricao;
+            document.getElementById('editCategoria').value = item.categoria;
+            document.getElementById('editValor').value = item.valor;
+            document.getElementById('editLocal').value = item.local || '';
+            
+            const extraFields = document.getElementById('editExtraFields');
+            if(tipo === 'saida') {
+                extraFields.classList.remove('hidden');
+                document.getElementById('editParcela').value = item.parcela || '';
+                document.getElementById('editRecorrente').checked = item.recorrente || false;
+            } else {
+                extraFields.classList.add('hidden');
+            }
+
             const modal = document.getElementById('editModal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
@@ -386,22 +411,30 @@
             modal.classList.remove('flex');
         };
 
-        // Submissão do Formulário de Edição
         document.getElementById('editForm').onsubmit = async (e) => {
             e.preventDefault();
             const id = document.getElementById('editId').value;
             const tipo = document.getElementById('editTipo').value;
-            const valor = parseFloat(document.getElementById('editValor').value);
-            const descricao = document.getElementById('editDescricao').value;
-            try {
-                await updateDoc(doc(db, `artifacts/${appId}/public/data/${tipo}`, id), { valor, descricao });
-                window.fecharModal();
-            } catch (e) {
-                console.error("Erro ao atualizar:", e);
+            
+            const updatedData = {
+                data: document.getElementById('editData').value,
+                descricao: document.getElementById('editDescricao').value,
+                categoria: document.getElementById('editCategoria').value,
+                valor: parseFloat(document.getElementById('editValor').value),
+                local: document.getElementById('editLocal').value
+            };
+
+            if(tipo === 'saida') {
+                updatedData.parcela = document.getElementById('editParcela').value;
+                updatedData.recorrente = document.getElementById('editRecorrente').checked;
             }
+
+            try {
+                await updateDoc(doc(db, `artifacts/${appId}/public/data/${tipo}`, id), updatedData);
+                window.fecharModal();
+            } catch (e) { console.error("Erro ao atualizar:", e); }
         };
 
-        // Submissão do Novo Lançamento
         document.getElementById('transacaoForm').onsubmit = async (e) => {
             e.preventDefault();
             const tipo = document.getElementById('tipoTransacao').value;
@@ -417,37 +450,27 @@
             const parc = document.getElementById('parcela').value;
             const rec = document.getElementById('recorrente').checked;
 
-            try {
-                if (tipo === 'saida') {
-                    const match = parc.match(/^(\d+)\/(\d+)$/);
-                    if (match) {
-                        // Lógica de Parcelamento Automático
-                        const atual = parseInt(match[1]), total = parseInt(match[2]);
-                        for (let i = atual; i <= total; i++) {
-                            const d = new Date(baseData.data + 'T00:00:00');
-                            d.setMonth(d.getMonth() + (i - atual));
-                            await addDoc(collection(db, `artifacts/${appId}/public/data/saida`), {
-                                ...baseData,
-                                data: d.toISOString().split('T')[0],
-                                parcela: `${i}/${total}`,
-                                recorrente: false
-                            });
-                        }
-                    } else {
-                        // Lançamento Único ou Fixo
-                        await addDoc(collection(db, `artifacts/${appId}/public/data/saida`), { ...baseData, parcela: '', recorrente: rec });
+            if (tipo === 'saida') {
+                const match = parc.match(/^(\d+)\/(\d+)$/);
+                if (match) {
+                    const atual = parseInt(match[1]), total = parseInt(match[2]);
+                    for (let i = atual; i <= total; i++) {
+                        const d = new Date(baseData.data + 'T00:00:00');
+                        d.setMonth(d.getMonth() + (i - atual));
+                        await addDoc(collection(db, `artifacts/${appId}/public/data/saida`), {
+                            ...baseData, data: d.toISOString().split('T')[0], parcela: `${i}/${total}`, recorrente: false
+                        });
                     }
                 } else {
-                    await addDoc(collection(db, `artifacts/${appId}/public/data/entrada`), baseData);
+                    await addDoc(collection(db, `artifacts/${appId}/public/data/saida`), { ...baseData, parcela: '', recorrente: rec });
                 }
-                e.target.reset();
-                document.getElementById('data').value = new Date().toISOString().split('T')[0];
-            } catch (e) {
-                console.error("Erro ao salvar:", e);
+            } else {
+                await addDoc(collection(db, `artifacts/${appId}/public/data/entrada`), baseData);
             }
+            e.target.reset();
+            document.getElementById('data').value = new Date().toISOString().split('T')[0];
         };
 
-        // Lógica para Importação de Gastos Fixos (Recorrentes)
         document.getElementById('btnImportarRecorrentes').onclick = async () => {
             const mesAtual = parseInt(document.getElementById('mes').value);
             const anoAtual = parseInt(document.getElementById('ano').value);
@@ -459,27 +482,22 @@
                 return s.recorrente && y === anoAnt && m === mesAnt;
             });
 
-            if (recsAnt.length === 0) return alert("Não existem contas fixas assinaladas no mês anterior.");
+            if (recsAnt.length === 0) return alert("Nenhuma conta fixa encontrada no mês anterior.");
             
-            if (confirm(`Encontrei ${recsAnt.length} contas fixas. Lançar para o mês ${mesAtual}/${anoAtual}?`)) {
+            if (confirm(`Importar ${recsAnt.length} contas fixas para ${mesAtual}/${anoAtual}?`)) {
                 for (const r of recsAnt) {
                     const diaOriginal = r.data.split('-')[2];
                     const novaData = `${anoAtual}-${String(mesAtual).padStart(2, '0')}-${diaOriginal}`;
-                    const existe = saidas.some(s => s.descricao === r.descricao && s.data === novaData);
-                    if (!existe) {
+                    if (!saidas.some(s => s.descricao === r.descricao && s.data === novaData)) {
                         const { id, ...data } = r;
-                        await addDoc(collection(db, `artifacts/${appId}/public/data/saida`), {
-                            ...data,
-                            data: novaData,
-                            timestamp: serverTimestamp()
-                        });
+                        await addDoc(collection(db, `artifacts/${appId}/public/data/saida`), { ...data, data: novaData, timestamp: serverTimestamp() });
                     }
                 }
-                alert("Fixos importados com sucesso!");
+                alert("Importação concluída!");
             }
         };
 
-        // Lógica de Estética dos Botões de Entrada/Saída
+        // Form UX
         document.getElementById('btnEntrada').onclick = () => {
             document.getElementById('tipoTransacao').value = 'entrada';
             document.getElementById('btnEntrada').className = 'flex-1 py-2 rounded-lg font-bold bg-green-500 text-white shadow-sm border-2 border-green-500';
@@ -498,7 +516,7 @@
         const triggerRender = () => render();
         ['mes', 'ano', 'filterEntrada', 'filterSaida'].forEach(id => document.getElementById(id).onchange = triggerRender);
 
-        // Inicialização do Firebase e Listeners
+        // App start
         window.onload = () => {
             initSelects();
             const hoje = new Date();
@@ -513,17 +531,14 @@
                     document.getElementById('googleSignInBtn').classList.add('hidden');
                     document.getElementById('logoutBtn').classList.remove('hidden');
 
-                    // Listener para Entradas
                     onSnapshot(collection(db, `artifacts/${appId}/public/data/entrada`), s => {
                         entradas = s.docs.map(d => ({ id: d.id, ...d.data() }));
                         render();
-                    }, (err) => console.error("Erro entradas:", err));
-
-                    // Listener para Saídas
+                    });
                     onSnapshot(collection(db, `artifacts/${appId}/public/data/saida`), s => {
                         saidas = s.docs.map(d => ({ id: d.id, ...d.data() }));
                         render();
-                    }, (err) => console.error("Erro saídas:", err));
+                    });
                 } else {
                     document.getElementById('authMessage').classList.add('hidden');
                     document.getElementById('googleSignInBtn').classList.remove('hidden');
