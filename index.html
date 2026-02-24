@@ -540,7 +540,7 @@
         let invUnsubscribers = [];
         let currentUserId = null;
 
-        function userPath(sub) { return `artifacts/${appId}/users/${currentUserId}/${sub}`; }
+        function userPath(sub) { return `artifacts/${appId}/public/data/${currentUserId}_${sub}`; }
 
         const DAYS_ORDER = ['segunda','terca','quarta','quinta','sexta','sabado','domingo'];
 
