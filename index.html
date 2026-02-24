@@ -464,7 +464,14 @@
                     <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm font-bold shadow-md">Adicionar Ano</button>
                 </form>
             </div>
+            <div class="flex border-b border-gray-200 mb-6">
+                <button id="invSubTabTabela" class="px-6 py-2 text-sm font-bold border-b-2 border-indigo-600 text-indigo-700 transition">Tabela</button>
+                <button id="invSubTabGraficos" class="px-6 py-2 text-sm font-bold text-gray-400 hover:text-gray-600 border-b-2 border-transparent transition">Graficos</button>
+            </div>
             <div id="invTablesContainer" class="space-y-8"></div>
+            <div id="invChartContainer" class="hidden bg-white rounded-xl shadow-lg border p-6">
+                <canvas id="invChart"></canvas>
+            </div>
         </div><!-- /investimentosContent -->
 
     </div>
@@ -521,6 +528,9 @@
             </form>
         </div>
     </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Firebase SDK -->
     <script type="module">
@@ -1102,10 +1112,12 @@
             invUnsubscribers.push(onSnapshot(collection(db, userPath('investimentos')), s => {
                 investimentos = s.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderInvestimentos();
+                if (!document.getElementById('invChartContainer').classList.contains('hidden')) renderInvChart();
             }));
             invUnsubscribers.push(onSnapshot(collection(db, userPath('inv_years')), s => {
                 invTrackedYears = s.docs.map(d => parseInt(d.id)).filter(y => !isNaN(y));
                 renderInvestimentos();
+                if (!document.getElementById('invChartContainer').classList.contains('hidden')) renderInvChart();
             }));
         }
         function unsubscribeInvestimentos() {
@@ -1236,6 +1248,111 @@
             document.getElementById('invTablesContainer').innerHTML = allHtml;
             bindInvEditableEvents();
             bindInvRemoveYearEvents();
+        }
+
+        // === INVESTIMENTOS: SUB-TAB TOGGLE ===
+        document.getElementById('invSubTabTabela').onclick = () => {
+            document.getElementById('invTablesContainer').classList.remove('hidden');
+            document.getElementById('invChartContainer').classList.add('hidden');
+            document.getElementById('invSubTabTabela').className = 'px-6 py-2 text-sm font-bold border-b-2 border-indigo-600 text-indigo-700 transition';
+            document.getElementById('invSubTabGraficos').className = 'px-6 py-2 text-sm font-bold text-gray-400 hover:text-gray-600 border-b-2 border-transparent transition';
+        };
+        document.getElementById('invSubTabGraficos').onclick = () => {
+            document.getElementById('invTablesContainer').classList.add('hidden');
+            document.getElementById('invChartContainer').classList.remove('hidden');
+            document.getElementById('invSubTabGraficos').className = 'px-6 py-2 text-sm font-bold border-b-2 border-indigo-600 text-indigo-700 transition';
+            document.getElementById('invSubTabTabela').className = 'px-6 py-2 text-sm font-bold text-gray-400 hover:text-gray-600 border-b-2 border-transparent transition';
+            renderInvChart();
+        };
+
+        // === INVESTIMENTOS: CHART ===
+        let invChartInstance = null;
+
+        function renderInvChart() {
+            const years = [...invTrackedYears].sort((a, b) => a - b);
+            if (years.length === 0) return;
+
+            const dataMap = {};
+            investimentos.forEach(inv => { dataMap[inv.id] = inv; });
+
+            const labels = [];
+            const tesouroData = [];
+            const acoesData = [];
+            const fundoData = [];
+
+            years.forEach(year => {
+                for (let m = 1; m <= 12; m++) {
+                    const docId = `${year}-${String(m).padStart(2, '0')}`;
+                    const inv = dataMap[docId] || {};
+                    labels.push(`${MONTH_NAMES[m - 1].substring(0, 3)}/${year}`);
+                    tesouroData.push(inv.tesouro || 0);
+                    acoesData.push(inv.acoes || 0);
+                    fundoData.push(inv.fundoImob || 0);
+                }
+            });
+
+            if (invChartInstance) invChartInstance.destroy();
+
+            const ctx = document.getElementById('invChart').getContext('2d');
+            invChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'Tesouro',
+                            data: tesouroData,
+                            borderColor: '#4F46E5',
+                            backgroundColor: 'rgba(79,70,229,0.1)',
+                            tension: 0.3,
+                            fill: false,
+                            pointRadius: 3,
+                            pointHoverRadius: 6
+                        },
+                        {
+                            label: 'Acoes',
+                            data: acoesData,
+                            borderColor: '#16A34A',
+                            backgroundColor: 'rgba(22,163,74,0.1)',
+                            tension: 0.3,
+                            fill: false,
+                            pointRadius: 3,
+                            pointHoverRadius: 6
+                        },
+                        {
+                            label: 'Fundo Imob.',
+                            data: fundoData,
+                            borderColor: '#EA580C',
+                            backgroundColor: 'rgba(234,88,12,0.1)',
+                            tension: 0.3,
+                            fill: false,
+                            pointRadius: 3,
+                            pointHoverRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'top', labels: { font: { weight: 'bold' } } },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => `${ctx.dataset.label}: ${formatMoeda(ctx.raw)}`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { callback: (v) => formatMoeda(v) }
+                        },
+                        x: {
+                            ticks: { maxRotation: 45, font: { size: 10 } }
+                        }
+                    }
+                }
+            });
         }
 
         // === INVESTIMENTOS: ADD / REMOVE YEAR ===
