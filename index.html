@@ -70,13 +70,25 @@
             border-radius: 10px;
             padding: 10px 12px;
             margin-bottom: 8px;
-            cursor: grab;
+            cursor: pointer;
             transition: all 0.2s ease;
             position: relative;
             box-shadow: 0 2px 6px rgba(0,0,0,0.06);
             user-select: none;
         }
-        .routine-card:active { cursor: grabbing; }
+        .routine-drag-handle {
+            position: absolute;
+            top: 50%;
+            right: 6px;
+            transform: translateY(-50%);
+            cursor: grab;
+            color: #C7C7CC;
+            font-size: 12px;
+            line-height: 1;
+            padding: 4px 2px;
+            letter-spacing: 1px;
+        }
+        .routine-drag-handle:active { cursor: grabbing; }
         .routine-card::before {
             content: '';
             position: absolute;
@@ -886,7 +898,6 @@
 
                     return `
                         <div class="routine-card ${isDone ? 'routine-card-done' : ''}"
-                             draggable="true"
                              data-task-id="${task.id}"
                              data-from-day="${day}">
                             ${isDone
@@ -895,6 +906,7 @@
                             }
                             <p class="text-sm font-semibold text-gray-800 mb-1 pr-6">${task.title}</p>
                             <span class="routine-count" data-count-title="${task.title}">${countLabel}</span>
+                            <span class="routine-drag-handle" draggable="true" title="Arrastar">⋮⋮</span>
                         </div>
                     `;
                 }).join('');
@@ -907,7 +919,7 @@
             // Click to toggle done
             document.querySelectorAll('.routine-card').forEach(card => {
                 card.onclick = (e) => {
-                    if (e.target.closest('.routine-delete-btn') || e.target.closest('.routine-count') || e.target.closest('.routine-goal-input')) return;
+                    if (e.target.closest('.routine-delete-btn') || e.target.closest('.routine-count') || e.target.closest('.routine-goal-input') || e.target.closest('.routine-drag-handle')) return;
                     const taskId = card.dataset.taskId;
                     const day = card.dataset.fromDay;
                     window.toggleRoutineDone(taskId, day);
@@ -955,17 +967,15 @@
                 };
             });
 
-            // Drag and drop
-            document.querySelectorAll('.routine-card').forEach(card => {
-                card.ondragstart = (e) => {
-                    if (e.target.closest('.routine-delete-btn') || e.target.closest('.routine-count') || e.target.closest('.routine-goal-input')) {
-                        e.preventDefault(); return;
-                    }
+            // Drag and drop (only from handle)
+            document.querySelectorAll('.routine-drag-handle').forEach(handle => {
+                const card = handle.closest('.routine-card');
+                handle.ondragstart = (e) => {
                     e.dataTransfer.setData('taskId', card.dataset.taskId);
                     e.dataTransfer.setData('fromDay', card.dataset.fromDay);
                     card.classList.add('routine-card-dragging');
                 };
-                card.ondragend = () => card.classList.remove('routine-card-dragging');
+                handle.ondragend = () => card.classList.remove('routine-card-dragging');
             });
 
             document.querySelectorAll('.routine-column').forEach(col => {
