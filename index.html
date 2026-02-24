@@ -180,6 +180,33 @@
             .routine-board { flex-direction: column; }
             .routine-column { min-width: 100%; }
         }
+
+        /* Investment Table */
+        .inv-editable {
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: background 0.15s ease;
+        }
+        .inv-editable:hover {
+            background: rgba(99,102,241,0.08);
+        }
+        .inv-input {
+            width: 110px;
+            padding: 4px 8px;
+            border: 2px solid #4F46E5;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            outline: none;
+            text-align: right;
+        }
+        .inv-input:focus {
+            box-shadow: 0 0 0 3px rgba(79,70,229,0.15);
+        }
+        .inv-positive { color: #16A34A; font-weight: 700; }
+        .inv-negative { color: #DC2626; font-weight: 700; }
+        .inv-zero { color: #9CA3AF; }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -187,7 +214,8 @@
         <!-- Top-Level Navigation -->
         <div class="flex border-b-2 border-gray-200 mb-6 bg-white rounded-t-xl shadow-sm overflow-hidden">
             <button id="topTabFinanceiro" class="flex-1 py-4 text-lg font-bold transition top-nav-active">Financeiro</button>
-            <button id="topTabRotina" class="flex-1 py-4 text-lg font-bold text-gray-500 hover:bg-gray-50 transition">Rotina Diaria</button>
+            <button id="topTabRotina" class="flex-1 py-4 text-lg font-bold text-gray-500 hover:bg-gray-50 transition hidden">Rotina Diaria</button>
+            <button id="topTabInvestimentos" class="flex-1 py-4 text-lg font-bold text-gray-500 hover:bg-gray-50 transition hidden">Investimentos</button>
         </div>
 
         <!-- Autenticação do Utilizador -->
@@ -359,61 +387,73 @@
                 <div class="routine-column" data-day="segunda">
                     <h3 class="text-sm font-bold text-indigo-700 mb-2 pb-2 border-b-2 border-indigo-100">Segunda</h3>
                     <form class="routine-add-form flex gap-2 mb-3" data-day="segunda">
-                        <input type="text" placeholder="Nova tarefa..." required class="flex-1 p-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none">
-                        <button type="submit" class="bg-indigo-500 text-white px-3 py-2 rounded-lg text-sm font-bold hover:bg-indigo-600 transition shadow-sm">+</button>
+                        <input type="text" placeholder="Nova tarefa..." required class="w-28 p-1.5 text-xs border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none">
+                        <button type="submit" class="bg-indigo-500 text-white px-2 py-1.5 rounded-lg text-xs font-bold hover:bg-indigo-600 transition shadow-sm">+</button>
                     </form>
                     <div class="routine-cards" data-day="segunda"></div>
                 </div>
                 <div class="routine-column" data-day="terca">
                     <h3 class="text-sm font-bold text-indigo-700 mb-2 pb-2 border-b-2 border-indigo-100">Terca</h3>
                     <form class="routine-add-form flex gap-2 mb-3" data-day="terca">
-                        <input type="text" placeholder="Nova tarefa..." required class="flex-1 p-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none">
-                        <button type="submit" class="bg-indigo-500 text-white px-3 py-2 rounded-lg text-sm font-bold hover:bg-indigo-600 transition shadow-sm">+</button>
+                        <input type="text" placeholder="Nova tarefa..." required class="w-28 p-1.5 text-xs border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none">
+                        <button type="submit" class="bg-indigo-500 text-white px-2 py-1.5 rounded-lg text-xs font-bold hover:bg-indigo-600 transition shadow-sm">+</button>
                     </form>
                     <div class="routine-cards" data-day="terca"></div>
                 </div>
                 <div class="routine-column" data-day="quarta">
                     <h3 class="text-sm font-bold text-indigo-700 mb-2 pb-2 border-b-2 border-indigo-100">Quarta</h3>
                     <form class="routine-add-form flex gap-2 mb-3" data-day="quarta">
-                        <input type="text" placeholder="Nova tarefa..." required class="flex-1 p-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none">
-                        <button type="submit" class="bg-indigo-500 text-white px-3 py-2 rounded-lg text-sm font-bold hover:bg-indigo-600 transition shadow-sm">+</button>
+                        <input type="text" placeholder="Nova tarefa..." required class="w-28 p-1.5 text-xs border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none">
+                        <button type="submit" class="bg-indigo-500 text-white px-2 py-1.5 rounded-lg text-xs font-bold hover:bg-indigo-600 transition shadow-sm">+</button>
                     </form>
                     <div class="routine-cards" data-day="quarta"></div>
                 </div>
                 <div class="routine-column" data-day="quinta">
                     <h3 class="text-sm font-bold text-indigo-700 mb-2 pb-2 border-b-2 border-indigo-100">Quinta</h3>
                     <form class="routine-add-form flex gap-2 mb-3" data-day="quinta">
-                        <input type="text" placeholder="Nova tarefa..." required class="flex-1 p-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none">
-                        <button type="submit" class="bg-indigo-500 text-white px-3 py-2 rounded-lg text-sm font-bold hover:bg-indigo-600 transition shadow-sm">+</button>
+                        <input type="text" placeholder="Nova tarefa..." required class="w-28 p-1.5 text-xs border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none">
+                        <button type="submit" class="bg-indigo-500 text-white px-2 py-1.5 rounded-lg text-xs font-bold hover:bg-indigo-600 transition shadow-sm">+</button>
                     </form>
                     <div class="routine-cards" data-day="quinta"></div>
                 </div>
                 <div class="routine-column" data-day="sexta">
                     <h3 class="text-sm font-bold text-indigo-700 mb-2 pb-2 border-b-2 border-indigo-100">Sexta</h3>
                     <form class="routine-add-form flex gap-2 mb-3" data-day="sexta">
-                        <input type="text" placeholder="Nova tarefa..." required class="flex-1 p-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none">
-                        <button type="submit" class="bg-indigo-500 text-white px-3 py-2 rounded-lg text-sm font-bold hover:bg-indigo-600 transition shadow-sm">+</button>
+                        <input type="text" placeholder="Nova tarefa..." required class="w-28 p-1.5 text-xs border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none">
+                        <button type="submit" class="bg-indigo-500 text-white px-2 py-1.5 rounded-lg text-xs font-bold hover:bg-indigo-600 transition shadow-sm">+</button>
                     </form>
                     <div class="routine-cards" data-day="sexta"></div>
                 </div>
                 <div class="routine-column" data-day="sabado">
                     <h3 class="text-sm font-bold text-indigo-700 mb-2 pb-2 border-b-2 border-indigo-100">Sabado</h3>
                     <form class="routine-add-form flex gap-2 mb-3" data-day="sabado">
-                        <input type="text" placeholder="Nova tarefa..." required class="flex-1 p-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none">
-                        <button type="submit" class="bg-indigo-500 text-white px-3 py-2 rounded-lg text-sm font-bold hover:bg-indigo-600 transition shadow-sm">+</button>
+                        <input type="text" placeholder="Nova tarefa..." required class="w-28 p-1.5 text-xs border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none">
+                        <button type="submit" class="bg-indigo-500 text-white px-2 py-1.5 rounded-lg text-xs font-bold hover:bg-indigo-600 transition shadow-sm">+</button>
                     </form>
                     <div class="routine-cards" data-day="sabado"></div>
                 </div>
                 <div class="routine-column" data-day="domingo">
                     <h3 class="text-sm font-bold text-indigo-700 mb-2 pb-2 border-b-2 border-indigo-100">Domingo</h3>
                     <form class="routine-add-form flex gap-2 mb-3" data-day="domingo">
-                        <input type="text" placeholder="Nova tarefa..." required class="flex-1 p-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none">
-                        <button type="submit" class="bg-indigo-500 text-white px-3 py-2 rounded-lg text-sm font-bold hover:bg-indigo-600 transition shadow-sm">+</button>
+                        <input type="text" placeholder="Nova tarefa..." required class="w-28 p-1.5 text-xs border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none">
+                        <button type="submit" class="bg-indigo-500 text-white px-2 py-1.5 rounded-lg text-xs font-bold hover:bg-indigo-600 transition shadow-sm">+</button>
                     </form>
                     <div class="routine-cards" data-day="domingo"></div>
                 </div>
             </div>
         </div><!-- /rotinaContent -->
+
+        <!-- INVESTIMENTOS CONTENT -->
+        <div id="investimentosContent" class="top-section">
+            <div class="flex items-center justify-between mb-6 bg-white rounded-xl shadow-md p-4 border border-gray-100">
+                <h2 class="text-2xl font-bold text-gray-800">Investimentos</h2>
+                <form id="addYearForm" class="flex items-center gap-2">
+                    <input type="number" id="invNewYear" min="2020" max="2100" placeholder="Ano" required class="p-2 border border-gray-300 rounded-lg w-24 text-sm">
+                    <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm font-bold shadow-md">Adicionar Ano</button>
+                </form>
+            </div>
+            <div id="invTablesContainer" class="space-y-8"></div>
+        </div><!-- /investimentosContent -->
 
     </div>
 
@@ -495,6 +535,12 @@
         let routineTasks = [], routineWeekStatus = [];
         let routineCountsMap = {}, routineGoalsMap = {};
         let rotinaUnsubscribers = [];
+        let investimentos = [];
+        let invTrackedYears = [];
+        let invUnsubscribers = [];
+        let currentUserId = null;
+
+        function userPath(sub) { return `artifacts/${appId}/users/${currentUserId}/${sub}`; }
 
         const DAYS_ORDER = ['segunda','terca','quarta','quinta','sexta','sabado','domingo'];
 
@@ -767,13 +813,17 @@
             document.getElementById('mes').value = hoje.getMonth() + 1;
             document.getElementById('ano').value = hoje.getFullYear();
             document.getElementById('data').value = hoje.toISOString().split('T')[0];
+            document.getElementById('invNewYear').value = hoje.getFullYear();
 
             onAuthStateChanged(auth, user => {
                 if (user) {
+                    currentUserId = user.uid;
                     document.getElementById('authMessage').textContent = `Conectado: ${user.displayName}`;
                     document.getElementById('authMessage').classList.remove('hidden');
                     document.getElementById('googleSignInBtn').classList.add('hidden');
                     document.getElementById('logoutBtn').classList.remove('hidden');
+                    document.getElementById('topTabRotina').classList.remove('hidden');
+                    document.getElementById('topTabInvestimentos').classList.remove('hidden');
 
                     onSnapshot(collection(db, `artifacts/${appId}/public/data/entrada`), s => {
                         entradas = s.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -784,12 +834,18 @@
                         render();
                     });
                     subscribeRotina();
+                    subscribeInvestimentos();
                 } else {
+                    currentUserId = null;
                     document.getElementById('authMessage').classList.add('hidden');
                     document.getElementById('googleSignInBtn').classList.remove('hidden');
                     document.getElementById('logoutBtn').classList.add('hidden');
+                    document.getElementById('topTabRotina').classList.add('hidden');
+                    document.getElementById('topTabInvestimentos').classList.add('hidden');
+                    document.getElementById('topTabFinanceiro').click();
                     entradas = []; saidas = []; render();
                     unsubscribeRotina();
+                    unsubscribeInvestimentos();
                 }
             });
         };
@@ -797,7 +853,8 @@
         // === TOP-LEVEL TAB SWITCHING ===
         const topTabs = [
             { btn: 'topTabFinanceiro', content: 'financeiroContent' },
-            { btn: 'topTabRotina', content: 'rotinaContent' }
+            { btn: 'topTabRotina', content: 'rotinaContent' },
+            { btn: 'topTabInvestimentos', content: 'investimentosContent' }
         ];
         topTabs.forEach(t => {
             document.getElementById(t.btn).onclick = () => {
@@ -884,9 +941,9 @@
                         const goalVal = val ? parseInt(val) : null;
                         try {
                             if (goalVal && goalVal > 0) {
-                                await setDoc(doc(db, `artifacts/${appId}/public/data/rotina_goals`, title), { title, goal: goalVal });
+                                await setDoc(doc(db, userPath('rotina_goals'), title), { title, goal: goalVal });
                             } else {
-                                await deleteDoc(doc(db, `artifacts/${appId}/public/data/rotina_goals`, title));
+                                await deleteDoc(doc(db, userPath('rotina_goals'), title));
                             }
                         } catch(err) { console.error('Goal update error:', err); }
                     };
@@ -922,9 +979,9 @@
                     const toDay = col.dataset.day;
                     if (fromDay === toDay || !taskId) return;
                     try {
-                        await updateDoc(doc(db, `artifacts/${appId}/public/data/rotina_tasks`, taskId), { day: toDay });
+                        await updateDoc(doc(db, userPath('rotina_tasks'), taskId), { day: toDay });
                         const statusSnap = await getDocs(query(
-                            collection(db, `artifacts/${appId}/public/data/rotina_week_status`),
+                            collection(db, userPath('rotina_week_status')),
                             where('taskId', '==', taskId)
                         ));
                         for (const s of statusSnap.docs) { await deleteDoc(s.ref); }
@@ -937,7 +994,7 @@
         window.toggleRoutineDone = async (taskId, day) => {
             try {
                 const statusId = `${day}_${taskId}`;
-                const statusRef = doc(db, `artifacts/${appId}/public/data/rotina_week_status`, statusId);
+                const statusRef = doc(db, userPath('rotina_week_status'), statusId);
                 const existing = routineWeekStatus.find(s => s.taskId === taskId && s.day === day);
                 const wasDone = existing ? existing.done : false;
 
@@ -947,7 +1004,7 @@
                     await setDoc(statusRef, { taskId, day, done: true });
                     const task = routineTasks.find(t => t.id === taskId);
                     if (task) {
-                        const countRef = doc(db, `artifacts/${appId}/public/data/rotina_counts`, task.title);
+                        const countRef = doc(db, userPath('rotina_counts'), task.title);
                         const countSnap = await getDoc(countRef);
                         const current = countSnap.exists() ? countSnap.data().count : 0;
                         await setDoc(countRef, { title: task.title, count: current + 1 });
@@ -959,9 +1016,9 @@
         window.deleteRoutineTask = async (taskId, day) => {
             if (!confirm('Apagar esta tarefa?')) return;
             try {
-                await deleteDoc(doc(db, `artifacts/${appId}/public/data/rotina_tasks`, taskId));
+                await deleteDoc(doc(db, userPath('rotina_tasks'), taskId));
                 const statusSnap = await getDocs(query(
-                    collection(db, `artifacts/${appId}/public/data/rotina_week_status`),
+                    collection(db, userPath('rotina_week_status')),
                     where('taskId', '==', taskId)
                 ));
                 for (const s of statusSnap.docs) { await deleteDoc(s.ref); }
@@ -977,7 +1034,7 @@
                 const title = input.value.trim();
                 if (!title) return;
                 try {
-                    await addDoc(collection(db, `artifacts/${appId}/public/data/rotina_tasks`), {
+                    await addDoc(collection(db, userPath('rotina_tasks')), {
                         title, day, timestamp: serverTimestamp()
                     });
                     input.value = '';
@@ -989,7 +1046,7 @@
         document.getElementById('btnResetWeek').onclick = async () => {
             if (!confirm('Resetar todos os "feitos" da semana? O contador nao sera resetado.')) return;
             try {
-                const snap = await getDocs(collection(db, `artifacts/${appId}/public/data/rotina_week_status`));
+                const snap = await getDocs(collection(db, userPath('rotina_week_status')));
                 for (const s of snap.docs) { await deleteDoc(s.ref); }
             } catch(err) { console.error('Reset error:', err); }
         };
@@ -999,20 +1056,20 @@
             rotinaUnsubscribers.forEach(unsub => unsub());
             rotinaUnsubscribers = [];
 
-            rotinaUnsubscribers.push(onSnapshot(collection(db, `artifacts/${appId}/public/data/rotina_tasks`), s => {
+            rotinaUnsubscribers.push(onSnapshot(collection(db, userPath('rotina_tasks')), s => {
                 routineTasks = s.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderRotina();
             }));
-            rotinaUnsubscribers.push(onSnapshot(collection(db, `artifacts/${appId}/public/data/rotina_week_status`), s => {
+            rotinaUnsubscribers.push(onSnapshot(collection(db, userPath('rotina_week_status')), s => {
                 routineWeekStatus = s.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderRotina();
             }));
-            rotinaUnsubscribers.push(onSnapshot(collection(db, `artifacts/${appId}/public/data/rotina_counts`), s => {
+            rotinaUnsubscribers.push(onSnapshot(collection(db, userPath('rotina_counts')), s => {
                 routineCountsMap = {};
                 s.docs.forEach(d => { const data = d.data(); routineCountsMap[data.title || d.id] = data.count || 0; });
                 renderRotina();
             }));
-            rotinaUnsubscribers.push(onSnapshot(collection(db, `artifacts/${appId}/public/data/rotina_goals`), s => {
+            rotinaUnsubscribers.push(onSnapshot(collection(db, userPath('rotina_goals')), s => {
                 routineGoalsMap = {};
                 s.docs.forEach(d => { const data = d.data(); routineGoalsMap[data.title || d.id] = data.goal; });
                 renderRotina();
@@ -1025,6 +1082,199 @@
             routineTasks = []; routineWeekStatus = [];
             routineCountsMap = {}; routineGoalsMap = {};
             renderRotina();
+        }
+
+        // === INVESTIMENTOS: SUBSCRIBE ===
+        function subscribeInvestimentos() {
+            invUnsubscribers.forEach(u => u());
+            invUnsubscribers = [];
+
+            invUnsubscribers.push(onSnapshot(collection(db, userPath('investimentos')), s => {
+                investimentos = s.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderInvestimentos();
+            }));
+            invUnsubscribers.push(onSnapshot(collection(db, userPath('inv_years')), s => {
+                invTrackedYears = s.docs.map(d => parseInt(d.id)).filter(y => !isNaN(y));
+                renderInvestimentos();
+            }));
+        }
+        function unsubscribeInvestimentos() {
+            invUnsubscribers.forEach(u => u());
+            invUnsubscribers = [];
+            investimentos = [];
+            invTrackedYears = [];
+            renderInvestimentos();
+        }
+
+        // === INVESTIMENTOS: RENDER ===
+        const MONTH_NAMES = ['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+        function getInvTotal(dataMap, docId) {
+            const inv = dataMap[docId] || {};
+            return (inv.tesouro || 0) + (inv.acoes || 0) + (inv.fundoImob || 0);
+        }
+
+        function renderInvestimentos() {
+            const years = [...invTrackedYears].sort((a, b) => b - a);
+
+            const dataMap = {};
+            investimentos.forEach(inv => { dataMap[inv.id] = inv; });
+
+            const tableHeader = `
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="px-4 py-3 text-left font-bold text-gray-700">Meses</th>
+                        <th class="px-4 py-3 text-right font-bold text-gray-700">Tesouro</th>
+                        <th class="px-4 py-3 text-right font-bold text-gray-500">Tesouro %</th>
+                        <th class="px-4 py-3 text-right font-bold text-gray-700">Acoes</th>
+                        <th class="px-4 py-3 text-right font-bold text-gray-500">Acoes %</th>
+                        <th class="px-4 py-3 text-right font-bold text-gray-700">Fundo Imob.</th>
+                        <th class="px-4 py-3 text-right font-bold text-gray-500">Fundo %</th>
+                        <th class="px-4 py-3 text-right font-bold text-indigo-700">Total</th>
+                        <th class="px-4 py-3 text-right font-bold text-gray-500">Ultimo Mes</th>
+                        <th class="px-4 py-3 text-right font-bold text-gray-500">Variacao %</th>
+                    </tr>
+                </thead>`;
+
+            if (years.length === 0) {
+                document.getElementById('invTablesContainer').innerHTML = '<p class="text-gray-400 text-center py-8">Nenhum ano adicionado. Use o botao acima para adicionar.</p>';
+                return;
+            }
+
+            let allHtml = '';
+
+            years.forEach(year => {
+                let rowsHtml = '';
+                const prevDecId = `${year - 1}-12`;
+                let prevTotal = getInvTotal(dataMap, prevDecId);
+                const prevDecHasData = prevTotal > 0;
+
+                for (let m = 1; m <= 12; m++) {
+                    const docId = `${year}-${String(m).padStart(2, '0')}`;
+                    const inv = dataMap[docId] || {};
+                    const tesouro = inv.tesouro || 0;
+                    const acoes = inv.acoes || 0;
+                    const fundoImob = inv.fundoImob || 0;
+                    const total = tesouro + acoes + fundoImob;
+
+                    const tesouroP = total > 0 ? ((tesouro / total) * 100).toFixed(2) : '0.00';
+                    const acoesP = total > 0 ? ((acoes / total) * 100).toFixed(2) : '0.00';
+                    const fundoP = total > 0 ? ((fundoImob / total) * 100).toFixed(2) : '0.00';
+
+                    const hasPrev = m === 1 ? prevDecHasData : true;
+                    const ultimoMes = prevTotal;
+                    const variacao = ultimoMes > 0 ? (((total - ultimoMes) / ultimoMes) * 100).toFixed(1) : '0.0';
+                    const varClass = parseFloat(variacao) > 0 ? 'inv-positive' : (parseFloat(variacao) < 0 ? 'inv-negative' : 'inv-zero');
+
+                    rowsHtml += `
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="px-4 py-3 font-semibold text-gray-800">${MONTH_NAMES[m - 1]}</td>
+                            <td class="px-4 py-3 text-right">
+                                <span class="inv-editable" data-doc-id="${docId}" data-field="tesouro" data-ano="${year}" data-mes="${m}">${formatMoeda(tesouro)}</span>
+                            </td>
+                            <td class="px-4 py-3 text-right text-gray-400 text-xs">${tesouroP}%</td>
+                            <td class="px-4 py-3 text-right">
+                                <span class="inv-editable" data-doc-id="${docId}" data-field="acoes" data-ano="${year}" data-mes="${m}">${formatMoeda(acoes)}</span>
+                            </td>
+                            <td class="px-4 py-3 text-right text-gray-400 text-xs">${acoesP}%</td>
+                            <td class="px-4 py-3 text-right">
+                                <span class="inv-editable" data-doc-id="${docId}" data-field="fundoImob" data-ano="${year}" data-mes="${m}">${formatMoeda(fundoImob)}</span>
+                            </td>
+                            <td class="px-4 py-3 text-right text-gray-400 text-xs">${fundoP}%</td>
+                            <td class="px-4 py-3 text-right font-bold text-indigo-700">${formatMoeda(total)}</td>
+                            <td class="px-4 py-3 text-right text-gray-400">${hasPrev ? formatMoeda(ultimoMes) : '-'}</td>
+                            <td class="px-4 py-3 text-right ${hasPrev ? varClass : 'inv-zero'}">${hasPrev ? variacao + '%' : '-'}</td>
+                        </tr>
+                    `;
+                    prevTotal = total;
+                }
+
+                allHtml += `
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xl font-bold text-gray-700">${year}</h3>
+                            <button class="inv-remove-year text-xs text-red-500 hover:text-red-700 font-bold transition" data-year="${year}">Remover</button>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-lg border overflow-x-auto">
+                            <table class="min-w-full text-sm">
+                                ${tableHeader}
+                                <tbody class="divide-y divide-gray-200">${rowsHtml}</tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('invTablesContainer').innerHTML = allHtml;
+            bindInvEditableEvents();
+            bindInvRemoveYearEvents();
+        }
+
+        // === INVESTIMENTOS: ADD / REMOVE YEAR ===
+        document.getElementById('addYearForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const year = parseInt(document.getElementById('invNewYear').value);
+            if (!year || year < 2020 || year > 2100) return;
+            if (invTrackedYears.includes(year)) return;
+            try {
+                await setDoc(doc(db, userPath('inv_years'), String(year)), { year });
+            } catch(err) { console.error('Add year error:', err); }
+        };
+
+        function bindInvRemoveYearEvents() {
+            document.querySelectorAll('.inv-remove-year').forEach(btn => {
+                btn.onclick = async () => {
+                    const year = btn.dataset.year;
+                    if (!confirm(`Remover a tabela de ${year}? Os dados dos meses nao serao apagados.`)) return;
+                    try {
+                        await deleteDoc(doc(db, userPath('inv_years'), year));
+                    } catch(err) { console.error('Remove year error:', err); }
+                };
+            });
+        }
+
+        // === INVESTIMENTOS: INLINE EDITING ===
+        function bindInvEditableEvents() {
+            document.querySelectorAll('.inv-editable').forEach(span => {
+                span.onclick = () => {
+                    const docId = span.dataset.docId;
+                    const field = span.dataset.field;
+                    const ano = parseInt(span.dataset.ano);
+                    const mes = parseInt(span.dataset.mes);
+
+                    const currentData = investimentos.find(i => i.id === docId);
+                    const currentVal = currentData ? (currentData[field] || 0) : 0;
+
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.step = '0.01';
+                    input.className = 'inv-input';
+                    input.value = currentVal || '';
+                    input.placeholder = '0.00';
+                    span.replaceWith(input);
+                    input.focus();
+                    input.select();
+
+                    const save = async () => {
+                        const val = parseFloat(input.value) || 0;
+                        try {
+                            const docRef = doc(db, userPath('investimentos'), docId);
+                            const existing = await getDoc(docRef);
+                            if (existing.exists()) {
+                                await updateDoc(docRef, { [field]: val });
+                            } else {
+                                await setDoc(docRef, { tesouro: 0, acoes: 0, fundoImob: 0, ano, mes, [field]: val });
+                            }
+                        } catch(err) { console.error('Investment save error:', err); }
+                    };
+
+                    input.onkeydown = (ev) => {
+                        if (ev.key === 'Enter') { ev.preventDefault(); save(); }
+                        if (ev.key === 'Escape') renderInvestimentos();
+                    };
+                    input.onblur = () => save();
+                };
+            });
         }
 
         document.getElementById('googleSignInBtn').onclick = () => signInWithPopup(auth, provider);
