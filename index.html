@@ -469,7 +469,7 @@
                 <button id="invSubTabGraficos" class="px-6 py-2 text-sm font-bold text-gray-400 hover:text-gray-600 border-b-2 border-transparent transition">Graficos</button>
             </div>
             <div id="invTablesContainer" class="space-y-8"></div>
-            <div id="invChartContainer" class="hidden bg-white rounded-xl shadow-lg border p-6">
+            <div id="invChartContainer" class="hidden bg-white rounded-xl shadow-lg border p-6" style="max-height: 400px;">
                 <canvas id="invChart"></canvas>
             </div>
         </div><!-- /investimentosContent -->
@@ -1334,6 +1334,7 @@
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
                     plugins: {
                         legend: { position: 'top', labels: { font: { weight: 'bold' } } },
