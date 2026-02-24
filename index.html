@@ -338,6 +338,7 @@
                     <button id="tabSaidas" class="flex-1 py-4 font-bold text-indigo-600 border-b-4 border-indigo-600 bg-white">Saídas</button>
                     <button id="tabEntradas" class="flex-1 py-4 font-bold text-gray-500 hover:bg-gray-50 transition">Entradas</button>
                     <button id="tabOrcamento" class="flex-1 py-4 font-bold text-gray-500 hover:bg-gray-50 transition">Farol</button>
+                    <button id="tabAgrupado" class="flex-1 py-4 font-bold text-gray-500 hover:bg-gray-50 transition">Agrupado</button>
                 </div>
 
                 <div id="contentSaidas" class="tab-content active space-y-4">
@@ -381,6 +382,24 @@
 
                 <div id="contentOrcamento" class="tab-content">
                     <div id="orcamentoList" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+                </div>
+
+                <div id="contentAgrupado" class="tab-content space-y-4">
+                    <div class="bg-white rounded-xl shadow-lg border overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 text-sm">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="px-4 py-3 text-left font-bold text-gray-700">Descrição</th>
+                                    <th class="px-4 py-3 text-left font-bold text-gray-700">Categoria</th>
+                                    <th class="px-4 py-3 text-center font-bold text-gray-700">Qtd</th>
+                                    <th class="px-4 py-3 text-right font-bold text-gray-700">Total</th>
+                                    <th class="px-4 py-3 text-center font-bold text-gray-700">Tipo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="agrupadoList" class="divide-y divide-gray-200"></tbody>
+                            <tfoot id="agrupadoFooter" class="bg-gray-50 border-t-2 border-gray-300"></tfoot>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -459,15 +478,22 @@
         <div id="investimentosContent" class="top-section">
             <div class="flex items-center justify-between mb-6 bg-white rounded-xl shadow-md p-4 border border-gray-100">
                 <h2 class="text-2xl font-bold text-gray-800">Investimentos</h2>
-                <form id="addYearForm" class="flex items-center gap-2">
-                    <input type="number" id="invNewYear" min="2020" max="2100" placeholder="Ano" required class="p-2 border border-gray-300 rounded-lg w-24 text-sm">
-                    <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm font-bold shadow-md">Adicionar Ano</button>
-                </form>
+                <div class="flex items-center gap-3 flex-wrap">
+                    <button id="btnCalcularInv" class="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition text-sm font-bold shadow-md flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                        Calcular
+                    </button>
+                    <form id="addYearForm" class="flex items-center gap-2">
+                        <input type="number" id="invNewYear" min="2020" max="2100" placeholder="Ano" required class="p-2 border border-gray-300 rounded-lg w-24 text-sm">
+                        <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm font-bold shadow-md">Adicionar Ano</button>
+                    </form>
+                </div>
             </div>
             <div class="flex border-b border-gray-200 mb-6">
                 <button id="invSubTabTabela" class="px-6 py-2 text-sm font-bold border-b-2 border-indigo-600 text-indigo-700 transition">Tabela</button>
                 <button id="invSubTabGraficos" class="px-6 py-2 text-sm font-bold text-gray-400 hover:text-gray-600 border-b-2 border-transparent transition">Graficos</button>
             </div>
+            <div id="invSummary" class="hidden mb-6"></div>
             <div id="invTablesContainer" class="space-y-8"></div>
             <div id="invChartContainer" class="hidden bg-white rounded-xl shadow-lg border p-6" style="max-height: 400px;">
                 <canvas id="invChart"></canvas>
@@ -560,6 +586,7 @@
         let investimentos = [];
         let invTrackedYears = [];
         let invUnsubscribers = [];
+        let invCalcTriggered = false;
         let currentUserId = null;
 
         function userPath(sub) { return `artifacts/${appId}/public/data/${currentUserId}_${sub}`; }
@@ -583,7 +610,8 @@
         const tabs = [
             { btn: 'tabSaidas', content: 'contentSaidas' },
             { btn: 'tabEntradas', content: 'contentEntradas' },
-            { btn: 'tabOrcamento', content: 'contentOrcamento' }
+            { btn: 'tabOrcamento', content: 'contentOrcamento' },
+            { btn: 'tabAgrupado', content: 'contentAgrupado' }
         ];
         tabs.forEach(t => {
             document.getElementById(t.btn).onclick = () => {
@@ -681,6 +709,62 @@
                     </div>
                 `;
             }).join('');
+
+            // Agrupado por Descrição
+            const allMonth = [
+                ...entradas.filter(t => { const [y, m] = t.data.split('-').map(Number); return y === ano && m === mes; }).map(t => ({ ...t, _tipo: 'entrada' })),
+                ...saidas.filter(t => { const [y, m] = t.data.split('-').map(Number); return y === ano && m === mes; }).map(t => ({ ...t, _tipo: 'saida' }))
+            ];
+
+            const descGroups = {};
+            allMonth.forEach(t => {
+                const key = t.descricao;
+                if (!descGroups[key]) descGroups[key] = { descricao: key, categoria: t.categoria, qtd: 0, total: 0, tipos: new Set() };
+                descGroups[key].qtd++;
+                descGroups[key].total += t.valor;
+                descGroups[key].tipos.add(t._tipo);
+            });
+
+            const groupedArr = Object.values(descGroups).sort((a, b) => b.total - a.total);
+
+            document.getElementById('agrupadoList').innerHTML = groupedArr.map(g => {
+                const isEntrada = g.tipos.has('entrada') && !g.tipos.has('saida');
+                const isSaida = g.tipos.has('saida') && !g.tipos.has('entrada');
+                const colorCls = isEntrada ? 'text-green-600' : (isSaida ? 'text-red-600' : 'text-indigo-600');
+                const tipoBadge = isEntrada
+                    ? '<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-bold">Entrada</span>'
+                    : (isSaida
+                        ? '<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs font-bold">Saída</span>'
+                        : '<span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-xs font-bold">Misto</span>');
+                return `
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-4 py-3 font-medium">${g.descricao}</td>
+                        <td class="px-4 py-3 text-gray-500">${g.categoria}</td>
+                        <td class="px-4 py-3 text-center">${g.qtd}</td>
+                        <td class="px-4 py-3 text-right ${colorCls} font-bold">${formatMoeda(g.total)}</td>
+                        <td class="px-4 py-3 text-center">${tipoBadge}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            const totalEntGrp = groupedArr.filter(g => g.tipos.has('entrada')).reduce((s, g) => s + (g.tipos.has('saida') ? 0 : g.total), 0);
+            const totalSaiGrp = groupedArr.filter(g => g.tipos.has('saida')).reduce((s, g) => s + (g.tipos.has('entrada') ? 0 : g.total), 0);
+            document.getElementById('agrupadoFooter').innerHTML = `
+                <tr>
+                    <td class="px-4 py-3 font-bold text-gray-800">Total</td>
+                    <td class="px-4 py-3"></td>
+                    <td class="px-4 py-3 text-center font-bold">${groupedArr.reduce((s, g) => s + g.qtd, 0)}</td>
+                    <td class="px-4 py-3 text-right font-bold text-green-600">${formatMoeda(totalEntGrp)}</td>
+                    <td class="px-4 py-3 text-center"><span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-bold">Entradas</span></td>
+                </tr>
+                <tr>
+                    <td class="px-4 py-3"></td>
+                    <td class="px-4 py-3"></td>
+                    <td class="px-4 py-3"></td>
+                    <td class="px-4 py-3 text-right font-bold text-red-600">${formatMoeda(totalSaiGrp)}</td>
+                    <td class="px-4 py-3 text-center"><span class="bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs font-bold">Saídas</span></td>
+                </tr>
+            `;
         }
 
         // Global functions for HTML access
@@ -1155,6 +1239,7 @@
                         <th class="px-4 py-3 text-right font-bold text-gray-700">Fundo Imob.</th>
                         <th class="px-4 py-3 text-right font-bold text-gray-500">Fun %</th>
                         <th class="px-4 py-3 text-right font-bold text-gray-500">Fun Var%</th>
+                        <th class="px-4 py-3 text-right font-bold text-emerald-700">Proventos</th>
                         <th class="px-4 py-3 text-right font-bold text-indigo-700">Total</th>
                         <th class="px-4 py-3 text-right font-bold text-gray-500">Ultimo Mes</th>
                         <th class="px-4 py-3 text-right font-bold text-gray-500">Variacao %</th>
@@ -1190,16 +1275,18 @@
                     const tesouro = inv.tesouro || 0;
                     const acoes = inv.acoes || 0;
                     const fundoImob = inv.fundoImob || 0;
+                    const proventos = inv.proventos || 0;
                     const total = tesouro + acoes + fundoImob;
 
                     const closed = year < curYear || (year === curYear && m < curMonth);
+                    const showCalcs = closed || (invCalcTriggered && total > 0);
 
                     const tesouroP = total > 0 ? ((tesouro / total) * 100).toFixed(2) : '0.00';
                     const acoesP = total > 0 ? ((acoes / total) * 100).toFixed(2) : '0.00';
                     const fundoP = total > 0 ? ((fundoImob / total) * 100).toFixed(2) : '0.00';
 
                     const hasPrev = m === 1 ? prevDecHasData : true;
-                    const showVar = closed && hasPrev;
+                    const showVar = showCalcs && hasPrev;
                     const ultimoMes = prevTotal;
                     const variacao = varPct(total, ultimoMes);
                     const tesVar = varPct(tesouro, prevTesouro);
@@ -1212,24 +1299,27 @@
                             <td class="px-4 py-3 text-right">
                                 <span class="inv-editable" data-doc-id="${docId}" data-field="tesouro" data-ano="${year}" data-mes="${m}">${formatMoeda(tesouro)}</span>
                             </td>
-                            <td class="px-4 py-3 text-right text-gray-400 text-xs">${closed ? tesouroP + '%' : '-'}</td>
+                            <td class="px-4 py-3 text-right text-gray-400 text-xs">${showCalcs ? tesouroP + '%' : '-'}</td>
                             <td class="px-4 py-3 text-right text-xs ${showVar ? varCls(parseFloat(tesVar)) : 'inv-zero'}">${showVar ? tesVar + '%' : '-'}</td>
                             <td class="px-4 py-3 text-right">
                                 <span class="inv-editable" data-doc-id="${docId}" data-field="acoes" data-ano="${year}" data-mes="${m}">${formatMoeda(acoes)}</span>
                             </td>
-                            <td class="px-4 py-3 text-right text-gray-400 text-xs">${closed ? acoesP + '%' : '-'}</td>
+                            <td class="px-4 py-3 text-right text-gray-400 text-xs">${showCalcs ? acoesP + '%' : '-'}</td>
                             <td class="px-4 py-3 text-right text-xs ${showVar ? varCls(parseFloat(acVar)) : 'inv-zero'}">${showVar ? acVar + '%' : '-'}</td>
                             <td class="px-4 py-3 text-right">
                                 <span class="inv-editable" data-doc-id="${docId}" data-field="fundoImob" data-ano="${year}" data-mes="${m}">${formatMoeda(fundoImob)}</span>
                             </td>
-                            <td class="px-4 py-3 text-right text-gray-400 text-xs">${closed ? fundoP + '%' : '-'}</td>
+                            <td class="px-4 py-3 text-right text-gray-400 text-xs">${showCalcs ? fundoP + '%' : '-'}</td>
                             <td class="px-4 py-3 text-right text-xs ${showVar ? varCls(parseFloat(funVar)) : 'inv-zero'}">${showVar ? funVar + '%' : '-'}</td>
+                            <td class="px-4 py-3 text-right">
+                                <span class="inv-editable" data-doc-id="${docId}" data-field="proventos" data-ano="${year}" data-mes="${m}">${formatMoeda(proventos)}</span>
+                            </td>
                             <td class="px-4 py-3 text-right font-bold text-indigo-700">${formatMoeda(total)}</td>
                             <td class="px-4 py-3 text-right text-gray-400">${showVar ? formatMoeda(ultimoMes) : '-'}</td>
                             <td class="px-4 py-3 text-right ${showVar ? varCls(parseFloat(variacao)) : 'inv-zero'}">${showVar ? variacao + '%' : '-'}</td>
                         </tr>
                     `;
-                    if (closed) {
+                    if (showCalcs) {
                         prevTotal = total;
                         prevTesouro = tesouro;
                         prevAcoes = acoes;
@@ -1256,6 +1346,7 @@
             document.getElementById('invTablesContainer').innerHTML = allHtml;
             bindInvEditableEvents();
             bindInvRemoveYearEvents();
+            if (invCalcTriggered) renderInvSummary();
         }
 
         // === INVESTIMENTOS: SUB-TAB TOGGLE ===
@@ -1388,6 +1479,115 @@
             });
         }
 
+        // === INVESTIMENTOS: CALCULAR TRIGGER ===
+        document.getElementById('btnCalcularInv').onclick = () => {
+            invCalcTriggered = true;
+            renderInvestimentos();
+        };
+
+        function renderInvSummary() {
+            const summaryEl = document.getElementById('invSummary');
+            if (!invCalcTriggered || investimentos.length === 0) {
+                summaryEl.classList.add('hidden');
+                return;
+            }
+
+            const dataMap = {};
+            investimentos.forEach(inv => { dataMap[inv.id] = inv; });
+
+            const years = [...invTrackedYears].sort((a, b) => b - a);
+            let latestData = null, latestYear = 0, latestMonth = 0;
+            let prevData = null;
+            let yearStartData = null;
+
+            outer:
+            for (const year of years) {
+                for (let m = 12; m >= 1; m--) {
+                    const docId = `${year}-${String(m).padStart(2, '0')}`;
+                    const inv = dataMap[docId];
+                    if (inv && ((inv.tesouro || 0) + (inv.acoes || 0) + (inv.fundoImob || 0)) > 0) {
+                        if (!latestData) {
+                            latestData = inv;
+                            latestYear = year;
+                            latestMonth = m;
+                        } else if (!prevData) {
+                            prevData = inv;
+                            break outer;
+                        }
+                    }
+                }
+            }
+
+            if (!latestData) {
+                summaryEl.classList.add('hidden');
+                return;
+            }
+
+            const decPrevId = `${latestYear - 1}-12`;
+            const janId = `${latestYear}-01`;
+            if (dataMap[decPrevId]) {
+                const d = dataMap[decPrevId];
+                if ((d.tesouro || 0) + (d.acoes || 0) + (d.fundoImob || 0) > 0) yearStartData = d;
+            }
+            if (!yearStartData && dataMap[janId] && dataMap[janId] !== latestData) {
+                const d = dataMap[janId];
+                if ((d.tesouro || 0) + (d.acoes || 0) + (d.fundoImob || 0) > 0) yearStartData = d;
+            }
+
+            const total = (latestData.tesouro || 0) + (latestData.acoes || 0) + (latestData.fundoImob || 0);
+            const tesouroP = total > 0 ? ((latestData.tesouro || 0) / total * 100).toFixed(1) : '0.0';
+            const acoesP = total > 0 ? ((latestData.acoes || 0) / total * 100).toFixed(1) : '0.0';
+            const fundoP = total > 0 ? ((latestData.fundoImob || 0) / total * 100).toFixed(1) : '0.0';
+
+            let monthChangeHtml = '<span class="text-gray-400">-</span>';
+            if (prevData) {
+                const prevTotal = (prevData.tesouro || 0) + (prevData.acoes || 0) + (prevData.fundoImob || 0);
+                const diff = total - prevTotal;
+                const pct = prevTotal > 0 ? ((diff / prevTotal) * 100).toFixed(1) : '0.0';
+                const cls = diff > 0 ? 'text-green-600' : (diff < 0 ? 'text-red-600' : 'text-gray-500');
+                const sign = diff > 0 ? '+' : '';
+                monthChangeHtml = `<span class="${cls} font-bold">${sign}${formatMoeda(diff)}</span><br><span class="${cls} text-sm">(${sign}${pct}%)</span>`;
+            }
+
+            let ytdHtml = '<span class="text-gray-400">-</span>';
+            if (yearStartData) {
+                const startTotal = (yearStartData.tesouro || 0) + (yearStartData.acoes || 0) + (yearStartData.fundoImob || 0);
+                const diff = total - startTotal;
+                const pct = startTotal > 0 ? ((diff / startTotal) * 100).toFixed(1) : '0.0';
+                const cls = diff > 0 ? 'text-green-600' : (diff < 0 ? 'text-red-600' : 'text-gray-500');
+                const sign = diff > 0 ? '+' : '';
+                ytdHtml = `<span class="${cls} font-bold">${sign}${formatMoeda(diff)}</span><br><span class="${cls} text-sm">(${sign}${pct}%)</span>`;
+            }
+
+            const monthLabel = MONTH_NAMES[latestMonth - 1] + '/' + latestYear;
+            summaryEl.classList.remove('hidden');
+            summaryEl.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-white rounded-xl shadow-lg p-5 border-t-4 border-indigo-500 text-center">
+                        <p class="text-gray-500 font-medium text-sm">Patrimonio Total</p>
+                        <p class="text-2xl font-bold text-indigo-700 mt-1">${formatMoeda(total)}</p>
+                        <p class="text-xs text-gray-400 mt-1">Ref: ${monthLabel}</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-5 border-t-4 border-emerald-500 text-center">
+                        <p class="text-gray-500 font-medium text-sm">Distribuicao</p>
+                        <div class="flex justify-center gap-2 mt-2 text-xs font-bold flex-wrap">
+                            <span class="bg-indigo-100 text-indigo-700 px-2 py-1 rounded">Tes ${tesouroP}%</span>
+                            <span class="bg-green-100 text-green-700 px-2 py-1 rounded">Ac ${acoesP}%</span>
+                            <span class="bg-orange-100 text-orange-700 px-2 py-1 rounded">FI ${fundoP}%</span>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-5 border-t-4 border-blue-500 text-center">
+                        <p class="text-gray-500 font-medium text-sm">Variacao Mensal</p>
+                        <p class="mt-1">${monthChangeHtml}</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-5 border-t-4 border-purple-500 text-center">
+                        <p class="text-gray-500 font-medium text-sm">Variacao no Ano (YTD)</p>
+                        <p class="mt-1">${ytdHtml}</p>
+                    </div>
+                </div>
+            `;
+        }
+
         // === INVESTIMENTOS: INLINE EDITING ===
         function bindInvEditableEvents() {
             document.querySelectorAll('.inv-editable').forEach(span => {
@@ -1418,7 +1618,7 @@
                             if (existing.exists()) {
                                 await updateDoc(docRef, { [field]: val });
                             } else {
-                                await setDoc(docRef, { tesouro: 0, acoes: 0, fundoImob: 0, ano, mes, [field]: val });
+                                await setDoc(docRef, { tesouro: 0, acoes: 0, fundoImob: 0, proventos: 0, ano, mes, [field]: val });
                             }
                         } catch(err) { console.error('Investment save error:', err); }
                     };
