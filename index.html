@@ -20,12 +20,176 @@
         .tab-content.active { display: block; }
         /* Overlay para o modal de edição */
         .modal-overlay { background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(2px); }
+
+        /* Top-level navigation */
+        .top-nav-active {
+            border-bottom: 4px solid #4F46E5;
+            color: #4F46E5;
+            background: white;
+        }
+        .top-section { display: none; }
+        .top-section.active { display: block; }
+
+        /* Routine Board */
+        .routine-board {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 16px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(99,102,241,0.3) transparent;
+        }
+        .routine-board::-webkit-scrollbar { height: 8px; }
+        .routine-board::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 10px; }
+        .routine-board::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.3); border-radius: 10px; }
+
+        .routine-column {
+            min-width: 220px;
+            flex: 1;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid rgba(0,0,0,0.08);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .routine-column:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+        .routine-column-drag-over {
+            background: rgba(99,102,241,0.08) !important;
+            border-color: rgba(99,102,241,0.5) !important;
+            border-style: dashed !important;
+        }
+
+        .routine-card {
+            background: white;
+            border: 2px solid rgba(99,102,241,0.12);
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            cursor: grab;
+            transition: all 0.2s ease;
+            position: relative;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+            user-select: none;
+        }
+        .routine-card:active { cursor: grabbing; }
+        .routine-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 4px; height: 100%;
+            background: linear-gradient(135deg, #4F46E5, #7C3AED);
+            border-radius: 10px 0 0 10px;
+            transform: scaleY(0);
+            transition: transform 0.2s ease;
+        }
+        .routine-card:hover::before { transform: scaleY(1); }
+        .routine-card:hover {
+            box-shadow: 0 4px 12px rgba(99,102,241,0.15);
+            transform: translateY(-2px);
+            border-color: rgba(99,102,241,0.25);
+        }
+        .routine-card-dragging { opacity: 0.4; transform: rotate(3deg); }
+
+        .routine-card-done {
+            background: linear-gradient(135deg, #C7D2FE, #A5B4FC);
+            border-color: #4F46E5;
+            box-shadow: 0 4px 16px rgba(79,70,229,0.2);
+        }
+        .routine-card-done::before { transform: scaleY(1); }
+
+        .routine-checkmark {
+            position: absolute;
+            top: 8px; right: 8px;
+            width: 20px; height: 20px;
+            background: linear-gradient(135deg, #4F46E5, #7C3AED);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            box-shadow: 0 2px 6px rgba(79,70,229,0.4);
+            animation: rCheckPop 0.3s ease;
+        }
+        @keyframes rCheckPop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .routine-count {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: rgba(99,102,241,0.06);
+            border: 1px solid rgba(99,102,241,0.1);
+            font-size: 0.75rem;
+            color: #6366F1;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .routine-count:hover {
+            background: rgba(99,102,241,0.12);
+            transform: scale(1.05);
+        }
+        .routine-goal-input {
+            width: 80px;
+            padding: 4px 8px;
+            border: 2px solid #4F46E5;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            outline: none;
+        }
+        .routine-goal-input:focus {
+            box-shadow: 0 0 0 3px rgba(79,70,229,0.15);
+        }
+
+        .routine-delete-btn {
+            position: absolute;
+            top: 6px; right: 6px;
+            width: 22px; height: 22px;
+            background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #EF4444;
+            transition: all 0.2s ease;
+            line-height: 1;
+            padding: 0;
+        }
+        .routine-delete-btn:hover {
+            background: rgba(239,68,68,0.2);
+            transform: scale(1.15);
+        }
+
+        @media (max-width: 768px) {
+            .routine-board { flex-direction: column; }
+            .routine-column { min-width: 100%; }
+        }
     </style>
 </head>
-<body class="bg-gray-100 p-4 sm:p-8">
-    <div class="container mx-auto max-w-7xl">
-        <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">Controle Financeiro</h1>
-        
+<body class="bg-gray-100 min-h-screen">
+    <div class="w-full px-3 sm:px-6 py-4">
+        <!-- Top-Level Navigation -->
+        <div class="flex border-b-2 border-gray-200 mb-6 bg-white rounded-t-xl shadow-sm overflow-hidden">
+            <button id="topTabFinanceiro" class="flex-1 py-4 text-lg font-bold transition top-nav-active">Financeiro</button>
+            <button id="topTabRotina" class="flex-1 py-4 text-lg font-bold text-gray-500 hover:bg-gray-50 transition">Rotina Diaria</button>
+        </div>
+
         <!-- Autenticação do Utilizador -->
         <div class="flex items-center justify-between flex-wrap gap-4 mb-6 relative">
             <div id="authSection" class="flex items-center gap-4">
@@ -43,6 +207,9 @@
             <button id="logoutBtn" class="text-sm text-red-600 font-bold hover:underline hidden">Sair</button>
         </div>
         
+        <!-- FINANCEIRO CONTENT -->
+        <div id="financeiroContent" class="top-section active">
+
         <!-- Filtros Globais -->
         <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8 bg-white p-4 rounded-xl shadow-md border border-gray-100">
             <div class="flex items-center gap-2">
@@ -177,6 +344,77 @@
                 </div>
             </div>
         </div>
+
+        </div><!-- /financeiroContent -->
+
+        <!-- ROTINA DIARIA CONTENT -->
+        <div id="rotinaContent" class="top-section">
+            <div class="flex items-center justify-between mb-6 bg-white rounded-xl shadow-md p-4 border border-gray-100">
+                <h2 class="text-2xl font-bold text-gray-800">Rotina Diaria</h2>
+                <button id="btnResetWeek" class="bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 transition text-sm font-bold shadow-md">
+                    Resetar Semana
+                </button>
+            </div>
+            <div class="routine-board" id="routineBoard">
+                <div class="routine-column" data-day="segunda">
+                    <h3 class="text-sm font-bold text-indigo-700 mb-2 pb-2 border-b-2 border-indigo-100">Segunda</h3>
+                    <form class="routine-add-form flex gap-2 mb-3" data-day="segunda">
+                        <input type="text" placeholder="Nova tarefa..." required class="flex-1 p-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none">
+                        <button type="submit" class="bg-indigo-500 text-white px-3 py-2 rounded-lg text-sm font-bold hover:bg-indigo-600 transition shadow-sm">+</button>
+                    </form>
+                    <div class="routine-cards" data-day="segunda"></div>
+                </div>
+                <div class="routine-column" data-day="terca">
+                    <h3 class="text-sm font-bold text-indigo-700 mb-2 pb-2 border-b-2 border-indigo-100">Terca</h3>
+                    <form class="routine-add-form flex gap-2 mb-3" data-day="terca">
+                        <input type="text" placeholder="Nova tarefa..." required class="flex-1 p-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none">
+                        <button type="submit" class="bg-indigo-500 text-white px-3 py-2 rounded-lg text-sm font-bold hover:bg-indigo-600 transition shadow-sm">+</button>
+                    </form>
+                    <div class="routine-cards" data-day="terca"></div>
+                </div>
+                <div class="routine-column" data-day="quarta">
+                    <h3 class="text-sm font-bold text-indigo-700 mb-2 pb-2 border-b-2 border-indigo-100">Quarta</h3>
+                    <form class="routine-add-form flex gap-2 mb-3" data-day="quarta">
+                        <input type="text" placeholder="Nova tarefa..." required class="flex-1 p-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none">
+                        <button type="submit" class="bg-indigo-500 text-white px-3 py-2 rounded-lg text-sm font-bold hover:bg-indigo-600 transition shadow-sm">+</button>
+                    </form>
+                    <div class="routine-cards" data-day="quarta"></div>
+                </div>
+                <div class="routine-column" data-day="quinta">
+                    <h3 class="text-sm font-bold text-indigo-700 mb-2 pb-2 border-b-2 border-indigo-100">Quinta</h3>
+                    <form class="routine-add-form flex gap-2 mb-3" data-day="quinta">
+                        <input type="text" placeholder="Nova tarefa..." required class="flex-1 p-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none">
+                        <button type="submit" class="bg-indigo-500 text-white px-3 py-2 rounded-lg text-sm font-bold hover:bg-indigo-600 transition shadow-sm">+</button>
+                    </form>
+                    <div class="routine-cards" data-day="quinta"></div>
+                </div>
+                <div class="routine-column" data-day="sexta">
+                    <h3 class="text-sm font-bold text-indigo-700 mb-2 pb-2 border-b-2 border-indigo-100">Sexta</h3>
+                    <form class="routine-add-form flex gap-2 mb-3" data-day="sexta">
+                        <input type="text" placeholder="Nova tarefa..." required class="flex-1 p-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none">
+                        <button type="submit" class="bg-indigo-500 text-white px-3 py-2 rounded-lg text-sm font-bold hover:bg-indigo-600 transition shadow-sm">+</button>
+                    </form>
+                    <div class="routine-cards" data-day="sexta"></div>
+                </div>
+                <div class="routine-column" data-day="sabado">
+                    <h3 class="text-sm font-bold text-indigo-700 mb-2 pb-2 border-b-2 border-indigo-100">Sabado</h3>
+                    <form class="routine-add-form flex gap-2 mb-3" data-day="sabado">
+                        <input type="text" placeholder="Nova tarefa..." required class="flex-1 p-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none">
+                        <button type="submit" class="bg-indigo-500 text-white px-3 py-2 rounded-lg text-sm font-bold hover:bg-indigo-600 transition shadow-sm">+</button>
+                    </form>
+                    <div class="routine-cards" data-day="sabado"></div>
+                </div>
+                <div class="routine-column" data-day="domingo">
+                    <h3 class="text-sm font-bold text-indigo-700 mb-2 pb-2 border-b-2 border-indigo-100">Domingo</h3>
+                    <form class="routine-add-form flex gap-2 mb-3" data-day="domingo">
+                        <input type="text" placeholder="Nova tarefa..." required class="flex-1 p-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none">
+                        <button type="submit" class="bg-indigo-500 text-white px-3 py-2 rounded-lg text-sm font-bold hover:bg-indigo-600 transition shadow-sm">+</button>
+                    </form>
+                    <div class="routine-cards" data-day="domingo"></div>
+                </div>
+            </div>
+        </div><!-- /rotinaContent -->
+
     </div>
 
     <!-- Modal de Edição Completa -->
@@ -236,7 +474,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, serverTimestamp, query, where, getDocs, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAd1b6_av2NKg5WDdM03W8m6KuGkxhQpyQ",
@@ -254,6 +492,12 @@
         const appId = firebaseConfig.projectId;
 
         let entradas = [], saidas = [];
+        let routineTasks = [], routineWeekStatus = [];
+        let routineCountsMap = {}, routineGoalsMap = {};
+        let rotinaUnsubscribers = [];
+
+        const DAYS_ORDER = ['segunda','terca','quarta','quinta','sexta','sabado','domingo'];
+
         const orcamentos = {
             "Aluguel e condomínio": 5200, "Luz": 800, "Internet": 120, "Carro": 1500, "Cachorros": 600,
             "Limpeza-Casa": 400, "Lazer": 1000, "Outros": 500, "Pessoal Caique": 1200, "Pessoal Estefanie": 1200,
@@ -539,14 +783,249 @@
                         saidas = s.docs.map(d => ({ id: d.id, ...d.data() }));
                         render();
                     });
+                    subscribeRotina();
                 } else {
                     document.getElementById('authMessage').classList.add('hidden');
                     document.getElementById('googleSignInBtn').classList.remove('hidden');
                     document.getElementById('logoutBtn').classList.add('hidden');
                     entradas = []; saidas = []; render();
+                    unsubscribeRotina();
                 }
             });
         };
+
+        // === TOP-LEVEL TAB SWITCHING ===
+        const topTabs = [
+            { btn: 'topTabFinanceiro', content: 'financeiroContent' },
+            { btn: 'topTabRotina', content: 'rotinaContent' }
+        ];
+        topTabs.forEach(t => {
+            document.getElementById(t.btn).onclick = () => {
+                topTabs.forEach(x => {
+                    document.getElementById(x.btn).classList.remove('top-nav-active');
+                    document.getElementById(x.btn).className = 'flex-1 py-4 text-lg font-bold text-gray-500 hover:bg-gray-50 transition';
+                    document.getElementById(x.content).classList.remove('active');
+                });
+                document.getElementById(t.btn).className = 'flex-1 py-4 text-lg font-bold transition top-nav-active';
+                document.getElementById(t.content).classList.add('active');
+            };
+        });
+
+        // === ROTINA: RENDER ===
+        function renderRotina() {
+            DAYS_ORDER.forEach(day => {
+                const container = document.querySelector(`.routine-cards[data-day="${day}"]`);
+                if (!container) return;
+
+                const dayTasks = routineTasks.filter(t => t.day === day);
+                const statusMap = {};
+                routineWeekStatus.forEach(s => { if (s.day === day) statusMap[s.taskId] = s.done; });
+
+                container.innerHTML = dayTasks.map(task => {
+                    const isDone = statusMap[task.id] || false;
+                    const count = routineCountsMap[task.title] || 0;
+                    const goal = routineGoalsMap[task.title];
+                    const countLabel = goal ? `${count}/${goal}` : `${count}x`;
+
+                    return `
+                        <div class="routine-card ${isDone ? 'routine-card-done' : ''}"
+                             draggable="true"
+                             data-task-id="${task.id}"
+                             data-from-day="${day}">
+                            ${isDone
+                                ? '<div class="routine-checkmark">&#10003;</div>'
+                                : `<button class="routine-delete-btn" data-delete-id="${task.id}" data-delete-day="${day}">&times;</button>`
+                            }
+                            <p class="text-sm font-semibold text-gray-800 mb-1 pr-6">${task.title}</p>
+                            <span class="routine-count" data-count-title="${task.title}">${countLabel}</span>
+                        </div>
+                    `;
+                }).join('');
+            });
+            bindRoutineCardEvents();
+        }
+
+        // === ROTINA: CARD EVENT BINDINGS ===
+        function bindRoutineCardEvents() {
+            // Click to toggle done
+            document.querySelectorAll('.routine-card').forEach(card => {
+                card.onclick = (e) => {
+                    if (e.target.closest('.routine-delete-btn') || e.target.closest('.routine-count') || e.target.closest('.routine-goal-input')) return;
+                    const taskId = card.dataset.taskId;
+                    const day = card.dataset.fromDay;
+                    window.toggleRoutineDone(taskId, day);
+                };
+            });
+
+            // Delete buttons
+            document.querySelectorAll('.routine-delete-btn').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    window.deleteRoutineTask(btn.dataset.deleteId, btn.dataset.deleteDay);
+                };
+            });
+
+            // Count click -> edit goal
+            document.querySelectorAll('.routine-count').forEach(span => {
+                span.onclick = (e) => {
+                    e.stopPropagation();
+                    const title = span.dataset.countTitle;
+                    const currentGoal = routineGoalsMap[title];
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.className = 'routine-goal-input';
+                    input.value = currentGoal || '';
+                    input.placeholder = 'Meta';
+                    span.replaceWith(input);
+                    input.focus();
+
+                    const save = async () => {
+                        const val = input.value.trim();
+                        const goalVal = val ? parseInt(val) : null;
+                        try {
+                            if (goalVal && goalVal > 0) {
+                                await setDoc(doc(db, `artifacts/${appId}/public/data/rotina_goals`, title), { title, goal: goalVal });
+                            } else {
+                                await deleteDoc(doc(db, `artifacts/${appId}/public/data/rotina_goals`, title));
+                            }
+                        } catch(err) { console.error('Goal update error:', err); }
+                    };
+                    input.onkeydown = (ev) => {
+                        if (ev.key === 'Enter') { ev.preventDefault(); save(); }
+                        if (ev.key === 'Escape') renderRotina();
+                    };
+                    input.onblur = () => save();
+                };
+            });
+
+            // Drag and drop
+            document.querySelectorAll('.routine-card').forEach(card => {
+                card.ondragstart = (e) => {
+                    if (e.target.closest('.routine-delete-btn') || e.target.closest('.routine-count') || e.target.closest('.routine-goal-input')) {
+                        e.preventDefault(); return;
+                    }
+                    e.dataTransfer.setData('taskId', card.dataset.taskId);
+                    e.dataTransfer.setData('fromDay', card.dataset.fromDay);
+                    card.classList.add('routine-card-dragging');
+                };
+                card.ondragend = () => card.classList.remove('routine-card-dragging');
+            });
+
+            document.querySelectorAll('.routine-column').forEach(col => {
+                col.ondragover = (e) => { e.preventDefault(); col.classList.add('routine-column-drag-over'); };
+                col.ondragleave = () => col.classList.remove('routine-column-drag-over');
+                col.ondrop = async (e) => {
+                    e.preventDefault();
+                    col.classList.remove('routine-column-drag-over');
+                    const taskId = e.dataTransfer.getData('taskId');
+                    const fromDay = e.dataTransfer.getData('fromDay');
+                    const toDay = col.dataset.day;
+                    if (fromDay === toDay || !taskId) return;
+                    try {
+                        await updateDoc(doc(db, `artifacts/${appId}/public/data/rotina_tasks`, taskId), { day: toDay });
+                        const statusSnap = await getDocs(query(
+                            collection(db, `artifacts/${appId}/public/data/rotina_week_status`),
+                            where('taskId', '==', taskId)
+                        ));
+                        for (const s of statusSnap.docs) { await deleteDoc(s.ref); }
+                    } catch(err) { console.error('Move error:', err); }
+                };
+            });
+        }
+
+        // === ROTINA: ACTIONS ===
+        window.toggleRoutineDone = async (taskId, day) => {
+            try {
+                const statusId = `${day}_${taskId}`;
+                const statusRef = doc(db, `artifacts/${appId}/public/data/rotina_week_status`, statusId);
+                const existing = routineWeekStatus.find(s => s.taskId === taskId && s.day === day);
+                const wasDone = existing ? existing.done : false;
+
+                if (wasDone) {
+                    await deleteDoc(statusRef);
+                } else {
+                    await setDoc(statusRef, { taskId, day, done: true });
+                    const task = routineTasks.find(t => t.id === taskId);
+                    if (task) {
+                        const countRef = doc(db, `artifacts/${appId}/public/data/rotina_counts`, task.title);
+                        const countSnap = await getDoc(countRef);
+                        const current = countSnap.exists() ? countSnap.data().count : 0;
+                        await setDoc(countRef, { title: task.title, count: current + 1 });
+                    }
+                }
+            } catch(err) { console.error('Toggle done error:', err); }
+        };
+
+        window.deleteRoutineTask = async (taskId, day) => {
+            if (!confirm('Apagar esta tarefa?')) return;
+            try {
+                await deleteDoc(doc(db, `artifacts/${appId}/public/data/rotina_tasks`, taskId));
+                const statusSnap = await getDocs(query(
+                    collection(db, `artifacts/${appId}/public/data/rotina_week_status`),
+                    where('taskId', '==', taskId)
+                ));
+                for (const s of statusSnap.docs) { await deleteDoc(s.ref); }
+            } catch(err) { console.error('Delete error:', err); }
+        };
+
+        // Add task forms
+        document.querySelectorAll('.routine-add-form').forEach(form => {
+            form.onsubmit = async (e) => {
+                e.preventDefault();
+                const day = form.dataset.day;
+                const input = form.querySelector('input[type="text"]');
+                const title = input.value.trim();
+                if (!title) return;
+                try {
+                    await addDoc(collection(db, `artifacts/${appId}/public/data/rotina_tasks`), {
+                        title, day, timestamp: serverTimestamp()
+                    });
+                    input.value = '';
+                } catch(err) { console.error('Add task error:', err); }
+            };
+        });
+
+        // Reset week
+        document.getElementById('btnResetWeek').onclick = async () => {
+            if (!confirm('Resetar todos os "feitos" da semana? O contador nao sera resetado.')) return;
+            try {
+                const snap = await getDocs(collection(db, `artifacts/${appId}/public/data/rotina_week_status`));
+                for (const s of snap.docs) { await deleteDoc(s.ref); }
+            } catch(err) { console.error('Reset error:', err); }
+        };
+
+        // === ROTINA: SUBSCRIBE TO FIRESTORE ===
+        function subscribeRotina() {
+            rotinaUnsubscribers.forEach(unsub => unsub());
+            rotinaUnsubscribers = [];
+
+            rotinaUnsubscribers.push(onSnapshot(collection(db, `artifacts/${appId}/public/data/rotina_tasks`), s => {
+                routineTasks = s.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderRotina();
+            }));
+            rotinaUnsubscribers.push(onSnapshot(collection(db, `artifacts/${appId}/public/data/rotina_week_status`), s => {
+                routineWeekStatus = s.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderRotina();
+            }));
+            rotinaUnsubscribers.push(onSnapshot(collection(db, `artifacts/${appId}/public/data/rotina_counts`), s => {
+                routineCountsMap = {};
+                s.docs.forEach(d => { const data = d.data(); routineCountsMap[data.title || d.id] = data.count || 0; });
+                renderRotina();
+            }));
+            rotinaUnsubscribers.push(onSnapshot(collection(db, `artifacts/${appId}/public/data/rotina_goals`), s => {
+                routineGoalsMap = {};
+                s.docs.forEach(d => { const data = d.data(); routineGoalsMap[data.title || d.id] = data.goal; });
+                renderRotina();
+            }));
+        }
+
+        function unsubscribeRotina() {
+            rotinaUnsubscribers.forEach(unsub => unsub());
+            rotinaUnsubscribers = [];
+            routineTasks = []; routineWeekStatus = [];
+            routineCountsMap = {}; routineGoalsMap = {};
+            renderRotina();
+        }
 
         document.getElementById('googleSignInBtn').onclick = () => signInWithPopup(auth, provider);
         document.getElementById('logoutBtn').onclick = () => signOut(auth);
