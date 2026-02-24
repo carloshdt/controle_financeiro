@@ -1135,11 +1135,14 @@
                     <tr>
                         <th class="px-4 py-3 text-left font-bold text-gray-700">Meses</th>
                         <th class="px-4 py-3 text-right font-bold text-gray-700">Tesouro</th>
-                        <th class="px-4 py-3 text-right font-bold text-gray-500">Tesouro %</th>
+                        <th class="px-4 py-3 text-right font-bold text-gray-500">Tes %</th>
+                        <th class="px-4 py-3 text-right font-bold text-gray-500">Tes Var%</th>
                         <th class="px-4 py-3 text-right font-bold text-gray-700">Acoes</th>
-                        <th class="px-4 py-3 text-right font-bold text-gray-500">Acoes %</th>
+                        <th class="px-4 py-3 text-right font-bold text-gray-500">Ac %</th>
+                        <th class="px-4 py-3 text-right font-bold text-gray-500">Ac Var%</th>
                         <th class="px-4 py-3 text-right font-bold text-gray-700">Fundo Imob.</th>
-                        <th class="px-4 py-3 text-right font-bold text-gray-500">Fundo %</th>
+                        <th class="px-4 py-3 text-right font-bold text-gray-500">Fun %</th>
+                        <th class="px-4 py-3 text-right font-bold text-gray-500">Fun Var%</th>
                         <th class="px-4 py-3 text-right font-bold text-indigo-700">Total</th>
                         <th class="px-4 py-3 text-right font-bold text-gray-500">Ultimo Mes</th>
                         <th class="px-4 py-3 text-right font-bold text-gray-500">Variacao %</th>
@@ -1153,10 +1156,17 @@
 
             let allHtml = '';
 
+            const varCls = (v) => v > 0 ? 'inv-positive' : (v < 0 ? 'inv-negative' : 'inv-zero');
+            const varPct = (cur, prev) => prev > 0 ? (((cur - prev) / prev) * 100).toFixed(1) : '0.0';
+
             years.forEach(year => {
                 let rowsHtml = '';
                 const prevDecId = `${year - 1}-12`;
+                const prevDec = dataMap[prevDecId] || {};
                 let prevTotal = getInvTotal(dataMap, prevDecId);
+                let prevTesouro = prevDec.tesouro || 0;
+                let prevAcoes = prevDec.acoes || 0;
+                let prevFundo = prevDec.fundoImob || 0;
                 const prevDecHasData = prevTotal > 0;
 
                 for (let m = 1; m <= 12; m++) {
@@ -1173,8 +1183,10 @@
 
                     const hasPrev = m === 1 ? prevDecHasData : true;
                     const ultimoMes = prevTotal;
-                    const variacao = ultimoMes > 0 ? (((total - ultimoMes) / ultimoMes) * 100).toFixed(1) : '0.0';
-                    const varClass = parseFloat(variacao) > 0 ? 'inv-positive' : (parseFloat(variacao) < 0 ? 'inv-negative' : 'inv-zero');
+                    const variacao = varPct(total, ultimoMes);
+                    const tesVar = varPct(tesouro, prevTesouro);
+                    const acVar = varPct(acoes, prevAcoes);
+                    const funVar = varPct(fundoImob, prevFundo);
 
                     rowsHtml += `
                         <tr class="hover:bg-gray-50 transition">
@@ -1183,20 +1195,26 @@
                                 <span class="inv-editable" data-doc-id="${docId}" data-field="tesouro" data-ano="${year}" data-mes="${m}">${formatMoeda(tesouro)}</span>
                             </td>
                             <td class="px-4 py-3 text-right text-gray-400 text-xs">${tesouroP}%</td>
+                            <td class="px-4 py-3 text-right text-xs ${hasPrev ? varCls(parseFloat(tesVar)) : 'inv-zero'}">${hasPrev ? tesVar + '%' : '-'}</td>
                             <td class="px-4 py-3 text-right">
                                 <span class="inv-editable" data-doc-id="${docId}" data-field="acoes" data-ano="${year}" data-mes="${m}">${formatMoeda(acoes)}</span>
                             </td>
                             <td class="px-4 py-3 text-right text-gray-400 text-xs">${acoesP}%</td>
+                            <td class="px-4 py-3 text-right text-xs ${hasPrev ? varCls(parseFloat(acVar)) : 'inv-zero'}">${hasPrev ? acVar + '%' : '-'}</td>
                             <td class="px-4 py-3 text-right">
                                 <span class="inv-editable" data-doc-id="${docId}" data-field="fundoImob" data-ano="${year}" data-mes="${m}">${formatMoeda(fundoImob)}</span>
                             </td>
                             <td class="px-4 py-3 text-right text-gray-400 text-xs">${fundoP}%</td>
+                            <td class="px-4 py-3 text-right text-xs ${hasPrev ? varCls(parseFloat(funVar)) : 'inv-zero'}">${hasPrev ? funVar + '%' : '-'}</td>
                             <td class="px-4 py-3 text-right font-bold text-indigo-700">${formatMoeda(total)}</td>
                             <td class="px-4 py-3 text-right text-gray-400">${hasPrev ? formatMoeda(ultimoMes) : '-'}</td>
-                            <td class="px-4 py-3 text-right ${hasPrev ? varClass : 'inv-zero'}">${hasPrev ? variacao + '%' : '-'}</td>
+                            <td class="px-4 py-3 text-right ${hasPrev ? varCls(parseFloat(variacao)) : 'inv-zero'}">${hasPrev ? variacao + '%' : '-'}</td>
                         </tr>
                     `;
                     prevTotal = total;
+                    prevTesouro = tesouro;
+                    prevAcoes = acoes;
+                    prevFundo = fundoImob;
                 }
 
                 allHtml += `
@@ -1256,8 +1274,8 @@
                     const currentVal = currentData ? (currentData[field] || 0) : 0;
 
                     const input = document.createElement('input');
-                    input.type = 'number';
-                    input.step = '0.01';
+                    input.type = 'text';
+                    input.inputMode = 'decimal';
                     input.className = 'inv-input';
                     input.value = currentVal || '';
                     input.placeholder = '0.00';
@@ -1266,7 +1284,7 @@
                     input.select();
 
                     const save = async () => {
-                        const val = parseFloat(input.value) || 0;
+                        const val = parseFloat(input.value.replace(/,/g, '')) || 0;
                         try {
                             const docRef = doc(db, userPath('investimentos'), docId);
                             const existing = await getDoc(docRef);
