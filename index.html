@@ -1170,6 +1170,9 @@
 
             const varCls = (v) => v > 0 ? 'inv-positive' : (v < 0 ? 'inv-negative' : 'inv-zero');
             const varPct = (cur, prev) => prev > 0 ? (((cur - prev) / prev) * 100).toFixed(1) : '0.0';
+            const now = new Date();
+            const curYear = now.getFullYear();
+            const curMonth = now.getMonth() + 1;
 
             years.forEach(year => {
                 let rowsHtml = '';
@@ -1189,11 +1192,14 @@
                     const fundoImob = inv.fundoImob || 0;
                     const total = tesouro + acoes + fundoImob;
 
+                    const closed = year < curYear || (year === curYear && m < curMonth);
+
                     const tesouroP = total > 0 ? ((tesouro / total) * 100).toFixed(2) : '0.00';
                     const acoesP = total > 0 ? ((acoes / total) * 100).toFixed(2) : '0.00';
                     const fundoP = total > 0 ? ((fundoImob / total) * 100).toFixed(2) : '0.00';
 
                     const hasPrev = m === 1 ? prevDecHasData : true;
+                    const showVar = closed && hasPrev;
                     const ultimoMes = prevTotal;
                     const variacao = varPct(total, ultimoMes);
                     const tesVar = varPct(tesouro, prevTesouro);
@@ -1206,27 +1212,29 @@
                             <td class="px-4 py-3 text-right">
                                 <span class="inv-editable" data-doc-id="${docId}" data-field="tesouro" data-ano="${year}" data-mes="${m}">${formatMoeda(tesouro)}</span>
                             </td>
-                            <td class="px-4 py-3 text-right text-gray-400 text-xs">${tesouroP}%</td>
-                            <td class="px-4 py-3 text-right text-xs ${hasPrev ? varCls(parseFloat(tesVar)) : 'inv-zero'}">${hasPrev ? tesVar + '%' : '-'}</td>
+                            <td class="px-4 py-3 text-right text-gray-400 text-xs">${closed ? tesouroP + '%' : '-'}</td>
+                            <td class="px-4 py-3 text-right text-xs ${showVar ? varCls(parseFloat(tesVar)) : 'inv-zero'}">${showVar ? tesVar + '%' : '-'}</td>
                             <td class="px-4 py-3 text-right">
                                 <span class="inv-editable" data-doc-id="${docId}" data-field="acoes" data-ano="${year}" data-mes="${m}">${formatMoeda(acoes)}</span>
                             </td>
-                            <td class="px-4 py-3 text-right text-gray-400 text-xs">${acoesP}%</td>
-                            <td class="px-4 py-3 text-right text-xs ${hasPrev ? varCls(parseFloat(acVar)) : 'inv-zero'}">${hasPrev ? acVar + '%' : '-'}</td>
+                            <td class="px-4 py-3 text-right text-gray-400 text-xs">${closed ? acoesP + '%' : '-'}</td>
+                            <td class="px-4 py-3 text-right text-xs ${showVar ? varCls(parseFloat(acVar)) : 'inv-zero'}">${showVar ? acVar + '%' : '-'}</td>
                             <td class="px-4 py-3 text-right">
                                 <span class="inv-editable" data-doc-id="${docId}" data-field="fundoImob" data-ano="${year}" data-mes="${m}">${formatMoeda(fundoImob)}</span>
                             </td>
-                            <td class="px-4 py-3 text-right text-gray-400 text-xs">${fundoP}%</td>
-                            <td class="px-4 py-3 text-right text-xs ${hasPrev ? varCls(parseFloat(funVar)) : 'inv-zero'}">${hasPrev ? funVar + '%' : '-'}</td>
+                            <td class="px-4 py-3 text-right text-gray-400 text-xs">${closed ? fundoP + '%' : '-'}</td>
+                            <td class="px-4 py-3 text-right text-xs ${showVar ? varCls(parseFloat(funVar)) : 'inv-zero'}">${showVar ? funVar + '%' : '-'}</td>
                             <td class="px-4 py-3 text-right font-bold text-indigo-700">${formatMoeda(total)}</td>
-                            <td class="px-4 py-3 text-right text-gray-400">${hasPrev ? formatMoeda(ultimoMes) : '-'}</td>
-                            <td class="px-4 py-3 text-right ${hasPrev ? varCls(parseFloat(variacao)) : 'inv-zero'}">${hasPrev ? variacao + '%' : '-'}</td>
+                            <td class="px-4 py-3 text-right text-gray-400">${showVar ? formatMoeda(ultimoMes) : '-'}</td>
+                            <td class="px-4 py-3 text-right ${showVar ? varCls(parseFloat(variacao)) : 'inv-zero'}">${showVar ? variacao + '%' : '-'}</td>
                         </tr>
                     `;
-                    prevTotal = total;
-                    prevTesouro = tesouro;
-                    prevAcoes = acoes;
-                    prevFundo = fundoImob;
+                    if (closed) {
+                        prevTotal = total;
+                        prevTesouro = tesouro;
+                        prevAcoes = acoes;
+                        prevFundo = fundoImob;
+                    }
                 }
 
                 allHtml += `
