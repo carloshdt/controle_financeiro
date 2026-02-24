@@ -1283,7 +1283,8 @@
             years.forEach(year => {
                 for (let m = 1; m <= 12; m++) {
                     const docId = `${year}-${String(m).padStart(2, '0')}`;
-                    const inv = dataMap[docId] || {};
+                    const inv = dataMap[docId];
+                    if (!inv || ((inv.tesouro || 0) + (inv.acoes || 0) + (inv.fundoImob || 0)) === 0) continue;
                     labels.push(`${MONTH_NAMES[m - 1].substring(0, 3)}/${year}`);
                     tesouroData.push(inv.tesouro || 0);
                     acoesData.push(inv.acoes || 0);
