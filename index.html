@@ -586,7 +586,7 @@
         let investimentos = [];
         let invTrackedYears = [];
         let invUnsubscribers = [];
-        let invCalcTriggered = false;
+        let invCalcTriggered = localStorage.getItem('invCalcTriggered') === 'true';
         let currentUserId = null;
 
         function userPath(sub) { return `artifacts/${appId}/public/data/${currentUserId}_${sub}`; }
@@ -1499,6 +1499,7 @@
         // === INVESTIMENTOS: CALCULAR TRIGGER ===
         document.getElementById('btnCalcularInv').onclick = () => {
             invCalcTriggered = true;
+            localStorage.setItem('invCalcTriggered', 'true');
             renderInvestimentos();
         };
 
