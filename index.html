@@ -1241,9 +1241,8 @@
                         <th class="px-4 py-3 text-right font-bold text-gray-500">Fun %</th>
                         <th class="px-4 py-3 text-right font-bold text-gray-500">Fun Var%</th>
                         <th class="px-4 py-3 text-right font-bold text-emerald-700">Proventos</th>
-                        <th class="px-4 py-3 text-right font-bold text-gray-500">Prov %</th>
-                        <th class="px-4 py-3 text-right font-bold text-indigo-700">Total</th>
                         <th class="px-4 py-3 text-right font-bold text-gray-500">Ultimo Mes</th>
+                        <th class="px-4 py-3 text-right font-bold text-indigo-700">Total</th>
                         <th class="px-4 py-3 text-right font-bold text-gray-500">Variacao %</th>
                     </tr>
                 </thead>`;
@@ -1322,9 +1321,8 @@
                             <td class="px-4 py-3 text-right">
                                 <span class="inv-editable" data-doc-id="${docId}" data-field="proventos" data-ano="${year}" data-mes="${m}">${formatMoeda(proventos)}</span>
                             </td>
-                            <td class="px-4 py-3 text-right text-gray-400 text-xs">${showCalcs ? proventosP + '%' : '-'}</td>
-                            <td class="px-4 py-3 text-right font-bold text-indigo-700">${formatMoeda(total)}</td>
                             <td class="px-4 py-3 text-right text-gray-400">${showVar ? formatMoeda(ultimoMes) : '-'}</td>
+                            <td class="px-4 py-3 text-right font-bold text-indigo-700">${formatMoeda(total)}</td>
                             <td class="px-4 py-3 text-right ${showVar ? varCls(parseFloat(variacao)) : 'inv-zero'}">${showVar ? variacao + '%' : '-'}</td>
                         </tr>
                     `;
