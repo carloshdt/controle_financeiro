@@ -1217,7 +1217,7 @@
 
         function getInvTotal(dataMap, docId) {
             const inv = dataMap[docId] || {};
-            return (inv.tesouro || 0) + (inv.acoes || 0) + (inv.fundoImob || 0) + (inv.proventos || 0);
+            return (inv.carteira || 0) + (inv.tesouro || 0) + (inv.acoes || 0) + (inv.fundoImob || 0) + (inv.proventos || 0);
         }
 
         function renderInvestimentos() {
@@ -1230,6 +1230,7 @@
                 <thead class="bg-gray-100">
                     <tr>
                         <th class="px-4 py-3 text-left font-bold text-gray-700">Meses</th>
+                        <th class="px-4 py-3 text-right font-bold text-gray-700">Carteira</th>
                         <th class="px-4 py-3 text-right font-bold text-gray-700">Tesouro</th>
                         <th class="px-4 py-3 text-right font-bold text-gray-500">Tes %</th>
                         <th class="px-4 py-3 text-right font-bold text-gray-500">Tes Var%</th>
@@ -1274,11 +1275,12 @@
                 for (let m = 1; m <= 12; m++) {
                     const docId = `${year}-${String(m).padStart(2, '0')}`;
                     const inv = dataMap[docId] || {};
+                    const carteira = inv.carteira || 0;
                     const tesouro = inv.tesouro || 0;
                     const acoes = inv.acoes || 0;
                     const fundoImob = inv.fundoImob || 0;
                     const proventos = inv.proventos || 0;
-                    const total = tesouro + acoes + fundoImob + proventos;
+                    const total = carteira + tesouro + acoes + fundoImob + proventos;
 
                     const closed = year < curYear || (year === curYear && m < curMonth);
                     const showCalcs = closed || (invCalcTriggered && total > 0);
@@ -1299,6 +1301,9 @@
                     rowsHtml += `
                         <tr class="hover:bg-gray-50 transition">
                             <td class="px-4 py-3 font-semibold text-gray-800">${MONTH_NAMES[m - 1]}</td>
+                            <td class="px-4 py-3 text-right">
+                                <span class="inv-editable" data-doc-id="${docId}" data-field="carteira" data-ano="${year}" data-mes="${m}">${formatMoeda(carteira)}</span>
+                            </td>
                             <td class="px-4 py-3 text-right">
                                 <span class="inv-editable" data-doc-id="${docId}" data-field="tesouro" data-ano="${year}" data-mes="${m}">${formatMoeda(tesouro)}</span>
                             </td>
@@ -1380,6 +1385,7 @@
             investimentos.forEach(inv => { dataMap[inv.id] = inv; });
 
             const labels = [];
+            const carteiraData = [];
             const tesouroData = [];
             const acoesData = [];
             const fundoData = [];
@@ -1389,8 +1395,9 @@
                 for (let m = 1; m <= 12; m++) {
                     const docId = `${year}-${String(m).padStart(2, '0')}`;
                     const inv = dataMap[docId];
-                    if (!inv || ((inv.tesouro || 0) + (inv.acoes || 0) + (inv.fundoImob || 0) + (inv.proventos || 0)) === 0) continue;
+                    if (!inv || ((inv.carteira || 0) + (inv.tesouro || 0) + (inv.acoes || 0) + (inv.fundoImob || 0) + (inv.proventos || 0)) === 0) continue;
                     labels.push(`${MONTH_NAMES[m - 1].substring(0, 3)}/${year}`);
+                    carteiraData.push(inv.carteira || 0);
                     tesouroData.push(inv.tesouro || 0);
                     acoesData.push(inv.acoes || 0);
                     fundoData.push(inv.fundoImob || 0);
@@ -1406,6 +1413,16 @@
                 data: {
                     labels,
                     datasets: [
+                        {
+                            label: 'Carteira',
+                            data: carteiraData,
+                            borderColor: '#8B5CF6',
+                            backgroundColor: 'rgba(139,92,246,0.1)',
+                            tension: 0.3,
+                            fill: false,
+                            pointRadius: 3,
+                            pointHoverRadius: 6
+                        },
                         {
                             label: 'Tesouro',
                             data: tesouroData,
@@ -1523,7 +1540,7 @@
                 for (let m = 12; m >= 1; m--) {
                     const docId = `${year}-${String(m).padStart(2, '0')}`;
                     const inv = dataMap[docId];
-                    if (inv && ((inv.tesouro || 0) + (inv.acoes || 0) + (inv.fundoImob || 0) + (inv.proventos || 0)) > 0) {
+                    if (inv && ((inv.carteira || 0) + (inv.tesouro || 0) + (inv.acoes || 0) + (inv.fundoImob || 0) + (inv.proventos || 0)) > 0) {
                         if (!latestData) {
                             latestData = inv;
                             latestYear = year;
@@ -1545,14 +1562,14 @@
             const janId = `${latestYear}-01`;
             if (dataMap[decPrevId]) {
                 const d = dataMap[decPrevId];
-                if ((d.tesouro || 0) + (d.acoes || 0) + (d.fundoImob || 0) + (d.proventos || 0) > 0) yearStartData = d;
+                if ((d.carteira || 0) + (d.tesouro || 0) + (d.acoes || 0) + (d.fundoImob || 0) + (d.proventos || 0) > 0) yearStartData = d;
             }
             if (!yearStartData && dataMap[janId] && dataMap[janId] !== latestData) {
                 const d = dataMap[janId];
-                if ((d.tesouro || 0) + (d.acoes || 0) + (d.fundoImob || 0) + (d.proventos || 0) > 0) yearStartData = d;
+                if ((d.carteira || 0) + (d.tesouro || 0) + (d.acoes || 0) + (d.fundoImob || 0) + (d.proventos || 0) > 0) yearStartData = d;
             }
 
-            const total = (latestData.tesouro || 0) + (latestData.acoes || 0) + (latestData.fundoImob || 0) + (latestData.proventos || 0);
+            const total = (latestData.carteira || 0) + (latestData.tesouro || 0) + (latestData.acoes || 0) + (latestData.fundoImob || 0) + (latestData.proventos || 0);
             const tesouroP = total > 0 ? ((latestData.tesouro || 0) / total * 100).toFixed(1) : '0.0';
             const acoesP = total > 0 ? ((latestData.acoes || 0) / total * 100).toFixed(1) : '0.0';
             const fundoP = total > 0 ? ((latestData.fundoImob || 0) / total * 100).toFixed(1) : '0.0';
@@ -1560,7 +1577,7 @@
 
             let monthChangeHtml = '<span class="text-gray-400">-</span>';
             if (prevData) {
-                const prevTotal = (prevData.tesouro || 0) + (prevData.acoes || 0) + (prevData.fundoImob || 0) + (prevData.proventos || 0);
+                const prevTotal = (prevData.carteira || 0) + (prevData.tesouro || 0) + (prevData.acoes || 0) + (prevData.fundoImob || 0) + (prevData.proventos || 0);
                 const diff = total - prevTotal;
                 const pct = prevTotal > 0 ? ((diff / prevTotal) * 100).toFixed(1) : '0.0';
                 const cls = diff > 0 ? 'text-green-600' : (diff < 0 ? 'text-red-600' : 'text-gray-500');
@@ -1570,7 +1587,7 @@
 
             let ytdHtml = '<span class="text-gray-400">-</span>';
             if (yearStartData) {
-                const startTotal = (yearStartData.tesouro || 0) + (yearStartData.acoes || 0) + (yearStartData.fundoImob || 0) + (yearStartData.proventos || 0);
+                const startTotal = (yearStartData.carteira || 0) + (yearStartData.tesouro || 0) + (yearStartData.acoes || 0) + (yearStartData.fundoImob || 0) + (yearStartData.proventos || 0);
                 const diff = total - startTotal;
                 const pct = startTotal > 0 ? ((diff / startTotal) * 100).toFixed(1) : '0.0';
                 const cls = diff > 0 ? 'text-green-600' : (diff < 0 ? 'text-red-600' : 'text-gray-500');
@@ -1638,7 +1655,7 @@
                             if (existing.exists()) {
                                 await updateDoc(docRef, { [field]: val });
                             } else {
-                                await setDoc(docRef, { tesouro: 0, acoes: 0, fundoImob: 0, proventos: 0, ano, mes, [field]: val });
+                                await setDoc(docRef, { carteira: 0, tesouro: 0, acoes: 0, fundoImob: 0, proventos: 0, ano, mes, [field]: val });
                             }
                         } catch(err) { console.error('Investment save error:', err); }
                     };
